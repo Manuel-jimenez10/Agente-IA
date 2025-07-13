@@ -23,7 +23,7 @@ export async function convertAudioToWav(audioBuffer: any): Promise<Buffer> {
       .audioCodec("pcm_s16le")
       .audioFrequency(16000)
       .format("wav")
-      .on("error", (err) => reject(`❌ Error en FFmpeg: ${err}`))
+      .on("error", (err: any) => reject(`❌ Error en FFmpeg: ${err}`))
       .pipe(outputStream);
 
     outputStream.on("data", (chunk) => chunks.push(chunk));
