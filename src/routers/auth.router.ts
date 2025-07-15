@@ -12,9 +12,11 @@ router.post(
   try {
     
     const response = await authController.register(
-      req.body.email as string,
-      req.body.phone as string      
-    );
+		req.body.email as string,
+		req.body.phone as string,
+		req.body.name as string,
+		req.body.lastname as string,
+	)
     res.send(response);
    
   }catch(e: any){

@@ -7,6 +7,7 @@ import http from 'http'
 import cors from "cors"
 import videoRouter from '@routers/video.router'
 import AuthRouter from '@routers/auth.router'
+import UserRouter from '@routers/user.router'
 import streamingRouter from '@routers/streaming.router'
 import whatsappRouter from '@routers/whatsapp.router'
 import messageRouter from '@routers/message.router'
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/api/auth', AuthRouter)
+app.use('/api/users', UserRouter)
 app.use('/api/videos', videoRouter);
 app.use('/api/streaming', streamingRouter);
 app.use('/api/whatsapp', whatsappRouter);

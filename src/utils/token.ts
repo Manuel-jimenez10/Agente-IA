@@ -4,6 +4,8 @@ interface ActivationPayload {
 	userId: string
 	email: string
 	phone: string
+	name: string
+	lastname: string
 }
 
 export function createActivationToken(data: ActivationPayload): string {

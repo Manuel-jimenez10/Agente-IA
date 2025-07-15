@@ -11,6 +11,8 @@ import { createActivationToken, verifyActivationToken } from '@utils/token'
 export async function register(
 	email: string,
 	phone: string,
+	name: string,
+	lastname: string,
 ): Promise<{ type: string }> {
 	try {
 		const existingUser = await userService.getUserByEmail(email)
@@ -19,8 +21,8 @@ export async function register(
 			throw { code: 409, message: 'Ya existe una cuenta con este correo' }
 		}
 
-		const userId = uuidv4();
-		const token = createActivationToken({ userId, email, phone });
+		const userId = uuidv4()
+		const token = createActivationToken({ userId, email, phone, name, lastname })
 
 		await sendActivationEmail(email, token)
 
@@ -34,9 +36,9 @@ export async function activateAccount(
 	token: string,
 ): Promise<{ id: string }> {
 	try {
-		const { userId, email, phone } = verifyActivationToken(token)
+		const { userId, email, phone, name, lastname } = verifyActivationToken(token)
 		const { id, now } = await authService.registerAuth(userId)
-		await userService.registerUser(userId, now, email, phone)
+		await userService.registerUser(userId, now, email, phone, name, lastname)
 		await settingService.initializeUserSettings(userId, now)
 
 		return { id }
