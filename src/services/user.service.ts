@@ -20,7 +20,11 @@ export async function registerUser(
 export async function getUserById(userId: string): Promise<any | null> {
 	return await userModel.findOne({ _id: userId })
 }
-  
+
+export async function getUserByEmail(email: string): Promise<any | null> {
+	return await userModel.findOne({ email })
+}
+
 export async function decryptSub(sub: string): Promise<string> {
 	const payload = jwt.verify(sub, JWT_SECRET) as {
 		sub: string

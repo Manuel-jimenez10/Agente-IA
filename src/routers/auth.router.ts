@@ -31,7 +31,7 @@ router.post(
   try {
     
     const response = await authController.activateAccount(
-      req.body.activationHash as string        
+      req.body.token as string        
     );
     res.send(response);
    

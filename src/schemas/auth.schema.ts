@@ -12,7 +12,7 @@ export const register = Joi.object({
 
 export const activateAccount = Joi.object({
   body: Joi.object({
-    activationHash: Joi.string().required()  
+    token: Joi.string().required()  
   }).required(),
   query: Joi.object().length(0),
   headers: Joi.object().unknown(true),

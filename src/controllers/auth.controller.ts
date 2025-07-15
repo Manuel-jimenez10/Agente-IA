@@ -1,20 +1,28 @@
 import { Request, Response } from 'express'
+import { v4 as uuidv4 } from 'uuid'
 import * as error from '@utils/error'
 import * as authService from '@services/auth.service'
-import * as cacheService from '@services/cache.service'
-import * as emailService from '@services/email.service'
 import * as userService from '@services/user.service'
 import * as settingService from '@services/setting.service'
 import * as tokenService from '@services/token.service'
-import * as messageService from '@services/message.service'
+import { sendActivationEmail } from '@utils/email'
+import { createActivationToken, verifyActivationToken } from '@utils/token'
 
 export async function register(
 	email: string,
 	phone: string,
 ): Promise<{ type: string }> {
 	try {
-		const activationHash = await cacheService.saveUserData(email, phone)
-		await emailService.sendAccountActivationEmail(email, activationHash)
+		const existingUser = await userService.getUserByEmail(email)
+
+		if (existingUser) {
+			throw { code: 409, message: 'Ya existe una cuenta con este correo' }
+		}
+
+		const userId = uuidv4();
+		const token = createActivationToken({ userId, email, phone });
+
+		await sendActivationEmail(email, token)
 
 		return { type: 'success' }
 	} catch (e: any) {
@@ -23,12 +31,10 @@ export async function register(
 }
 
 export async function activateAccount(
-	activationHash: string,
+	token: string,
 ): Promise<{ id: string }> {
 	try {
-		const { userId, email, phone } =
-			await cacheService.getUserDataByActivationHash(activationHash)
-		await cacheService.deleteUserData(activationHash)
+		const { userId, email, phone } = verifyActivationToken(token)
 		const { id, now } = await authService.registerAuth(userId)
 		await userService.registerUser(userId, now, email, phone)
 		await settingService.initializeUserSettings(userId, now)
