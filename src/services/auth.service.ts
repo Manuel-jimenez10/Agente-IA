@@ -8,49 +8,62 @@ import { JWT_SECRET } from '@config/config';
 export async function registerAuth(
 	userId: string,
 ): Promise<{ id: string; now: Date }> {
-	const now = new Date()
-
-	await authModel.insertOne({
-		userId,
-		createdAt: now,
-	})
-
-	return { id: userId, now }
+	try {
+		const now = new Date()
+		await authModel.insertOne({ userId, createdAt: now })
+		return { id: userId, now }
+	} catch (error: any) {
+		throw { code: 500, message: error.message || 'Error en registerAuth' }
+	}
 }
+  
 
 export async function login(
 	id: string,
 ): Promise<{ userId: string; sessionId: string }> {
-	const user = await userModel.findOne({ _id: id })
+	try {
+		const user = await userModel.findOne({ _id: id })
 
-	if (!user) {
-		throw { code: 404, message: 'Usuario no encontrado' }
+		if (!user) {
+			throw { code: 404, message: 'Usuario no encontrado' }
+		}
+
+		const sessionId = uuidv4()
+		return { userId: user._id, sessionId }
+	} catch (error: any) {
+		throw { code: 500, message: error.message || 'Error en login' }
 	}
-
-	const sessionId = uuidv4()
-
-	return { userId: user._id, sessionId }
 }
+  
 
 export async function processLogin(
 	userId: string,
 	clientId: string,
 	sessionId: string,
 ) {
-	const user = await userModel.findOne({ _id: userId })
-	const settings = await settingModel.findOne({ userId })
+	try {
+		const user = await userModel.findOne({ _id: userId })
+		const settings = await settingModel.findOne({ userId })
 
-	const token = jwt.sign(
-		{ userId, clientId, sessionId },
-		JWT_SECRET as string,
-		{ expiresIn: '2h' },
-	)
+		if (!user) {
+			throw { code: 404, message: 'Usuario no encontrado' }
+		}
 
-	return {
-		email: user.email,
-		phone: user.phone,
-		token,
-		sessionId,
-		settings
+		const token = jwt.sign(
+			{ userId, clientId, sessionId },
+			JWT_SECRET as string,
+			{ expiresIn: '2h' },
+		)
+
+		return {
+			email: user.email,
+			phone: user.phone,
+			token,
+			sessionId,
+			settings,
+		}
+	} catch (error: any) {
+		throw { code: 500, message: error.message || 'Error en processLogin' };
 	}
 }
+  

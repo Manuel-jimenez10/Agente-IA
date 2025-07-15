@@ -53,9 +53,9 @@ export async function login(
 ): Promise<{
 	email: string
 	phone: string
-	token: string
 	sessionId: string
 	settings: any
+	token: string
 }> {
 	try {
 		const { userId, sessionId } = await authService.login(id)
@@ -69,21 +69,18 @@ export async function login(
 	} catch (e: any) {
 		throw await error.createError(e)
 	}
-}
+}  
 
-export async function logout(req: Request, res: Response): Promise<void> {
+export async function logout(req: Request, res: Response): Promise<{ type: string }> {
 	try {
 		res.clearCookie('accessToken', {
 			httpOnly: true,
-			secure: true
+			secure: true,
 		})
 
-		res.send({ type: 'success' })
-	} catch (error: any) {
-		res.status(500).send({
-			type: 'error',
-			message: 'Error al cerrar sesión',
-		})
+		return { type: 'success' }
+	} catch (e: any) {
+		throw await error.createError(e)
 	}
 }
 
@@ -104,22 +101,24 @@ export async function refreshToken(
 
 export async function getAuthenticatedUser(
 	req: Request,
-	res: Response,
-): Promise<void> {
-	const userId = req.user?.userId
+): Promise<{ user: any }> {
+	try {
+		const userId = req.user?.userId
 
-	if (!userId) {
-		res.status(401).send('No se pudo validar el usuario')
-		return
+		if (!userId) {
+			throw { code: 401, message: 'No se pudo validar el usuario' }
+		}
+
+		const user = await userService.getUserById(userId)
+
+		if (!user) {
+			throw { code: 404, message: 'Usuario no encontrado' }
+		}
+
+		return { user }
+	} catch (error: any) {
+		throw await error.createError(error)
 	}
-
-	const user = await userService.getUserById(userId)
-
-	if (!user) {
-		res.status(404).send('Usuario no encontrado')
-		return
-	}
-
-	res.status(200).send({ user })
 }
+  
   

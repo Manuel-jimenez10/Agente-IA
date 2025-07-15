@@ -6,38 +6,56 @@ const router = Router();
 
 router.get('/', verifyToken, async (req: Request, res: Response) => {
 	try {
-		await userController.getUsers(req, res)
+		const response = await userController.getUsers()
+		res.status(200).send(response)
 	} catch (error: any) {
-		res.status(error.code || 500).send(error.message || 'Error interno')
+		res.status(error.code || 500).send({
+			type: 'error',
+			message: error.message || 'Error interno',
+		})
 	}
-})
+})  
 
 router.get('/:id', verifyToken, async (req: Request, res: Response) => {
 	try {
-		await userController.getUserById(req, res)
+		const response = await userController.getUserById(req.params.id)
+		res.status(200).send(response)
 	} catch (error: any) {
-		res.status(error.code || 500).send(error.message || 'Error interno')
+		res.status(error.code || 500).send({
+			type: 'error',
+			message: error.message || 'Error interno',
+		})
 	}
 })
+  
 
 router.put('/:id', validateParams(userSchema.updateUserSchema), verifyToken, async (req: Request, res: Response) => {
-	try {
-		await userController.updateUser(req, res)
-	} catch (error: any) {
-		res.status(error.code || 500).send(
-			error.message || 'Error al actualizar el usuario',
-		)
-	}
-})
-
+		try {
+			const response = await userController.updateUser(
+				req.params.id,
+				req.body,
+			)
+			res.status(200).send(response)
+		} catch (error: any) {
+			res.status(error.code || 500).send({
+				type: 'error',
+				message: error.message || 'Error al actualizar el usuario',
+			})
+		}
+	},
+)
+  
 router.delete('/:id', verifyToken, async (req: Request, res: Response) => {
 	try {
-		await userController.deleteUser(req, res)
+		const response = await userController.deleteUser(req.params.id)
+		res.status(200).send(response)
 	} catch (error: any) {
-		res.status(error.code || 500).send(
-			error.message || 'Error al borrar el usuario',
-		)
+		res.status(error.code || 500).send({
+			type: 'error',
+			message: error.message || 'Error al borrar el usuario',
+		})
 	}
-})      
+})
+	 
 
 export default router;

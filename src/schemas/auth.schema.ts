@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const registerSchema = Joi.object({
+export const register = Joi.object({
 	body: Joi.object({
 		email: Joi.string().email().required(),
 		phone: Joi.string()
