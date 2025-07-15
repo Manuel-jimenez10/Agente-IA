@@ -32,4 +32,3 @@ export const MAIL_USER = process.env.MAIL_USER as string
 export const MAIL_PASS = process.env.MAIL_PASS as string
 export const FRONTEND_URL = process.env.FRONTEND_URL as string
 export const JWT_SECRET = process.env.JWT_SECRET as string
-export const REFRESH_SECRET = process.env.REFRESH_SECRET as string

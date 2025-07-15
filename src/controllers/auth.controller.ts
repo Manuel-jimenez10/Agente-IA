@@ -93,3 +93,25 @@ export async function refreshToken(
 		throw await error.createError(e)
 	}
 }
+
+export async function getAuthenticatedUser(
+	req: Request,
+	res: Response,
+): Promise<void> {
+	const userId = req.user?.userId
+
+	if (!userId) {
+		res.status(401).send('No se pudo validar el usuario')
+		return
+	}
+
+	const user = await userService.getUserById(userId)
+
+	if (!user) {
+		res.status(404).send('Usuario no encontrado')
+		return
+	}
+
+	res.status(200).send({ user })
+}
+  

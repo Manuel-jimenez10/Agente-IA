@@ -34,6 +34,7 @@ export function verifyToken(
 
 	try {
 		const payload = jwt.verify(token, JWT_SECRET)
+		req.user = payload as { userId: string; clientId: string }
 		next()
 	} catch (err) {
 		res.status(401).send('Token inválido o expirado')

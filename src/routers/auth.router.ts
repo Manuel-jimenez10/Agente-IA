@@ -99,4 +99,15 @@ router.post(
 
 });
 
+router.get('/me', verifyToken, async (req, res) => {
+	try {
+		await authController.getAuthenticatedUser(req, res)
+	} catch (err: any) {
+		res.status(err.code || 500).send(
+			err.message || 'Error al obtener perfil',
+		)
+	}
+})
+
+
 export default router;

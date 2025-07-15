@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { userModel } from '@models/user.model'
-import { JWT_SECRET, REFRESH_SECRET } from '@config/config'
+import { JWT_SECRET } from '@config/config'
 
 export async function registerUser(
 	userId: string,
@@ -17,6 +17,10 @@ export async function registerUser(
 	})
 }
 
+export async function getUserById(userId: string): Promise<any | null> {
+	return await userModel.findOne({ _id: userId })
+}
+  
 export async function decryptSub(sub: string): Promise<string> {
 	const payload = jwt.verify(sub, JWT_SECRET) as {
 		sub: string
