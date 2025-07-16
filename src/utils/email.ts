@@ -1,28 +1,32 @@
-import { MAIL_PASS, MAIL_USER } from '@config/config';
-import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer'
+import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import * as error from '@utils/error'
+import * as config from '@config/config'
 
-const transporter = nodemailer.createTransport({
-	service: 'gmail',
-	auth: {
-		user: MAIL_USER,
-		pass: MAIL_PASS,
-	},
-})
+export async function send({ from, to, subject, html, }: { from: string; to: string; subject: string; html: string; }) {
+	try {
+		const transporter = nodemailer.createTransport({
+			service: 'gmail',
+			host: config.NODEMAILER_HOST,
+			port: Number(config.NODEMAILER_PORT),
+			secure: config.NODEMAILER_SECURE.toLowerCase() === 'true',
+			auth: {
+				user: config.NODEMAILER_AUTH_USER,
+				pass: config.NODEMAILER_AUTH_PASS,
+			},
+			tls: {
+				rejectUnauthorized:
+					config.NODEMAILER_TLS_REJECT_UNAUTHOTIZED.toLowerCase() === 'true',
+			},
+		} as SMTPTransport.Options)
 
-export async function sendActivationEmail(
-	email: string,
-	token: string,
-): Promise<void> {
-	const activationUrl = `${process.env.FRONTEND_URL}/activate?token=${token}`
-
-	await transporter.sendMail({
-		from: `"TuApp" <${process.env.MAIL_USER}>`,
-		to: email,
-		subject: 'Activa tu cuenta',
-		html: `
-      <h2>Bienvenido</h2>
-      <p>Haz clic para activar tu cuenta:</p>
-      <a href="${activationUrl}">${activationUrl}</a>
-    `,
-	})
+		return transporter.sendMail({
+			from: from,
+			to: to,
+			subject: subject,
+			html: html,
+		})
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
 }

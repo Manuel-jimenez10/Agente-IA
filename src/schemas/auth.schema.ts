@@ -2,18 +2,15 @@ import Joi from 'joi';
 
 export const register = Joi.object({
 	body: Joi.object({
-		email: Joi.string().email().required(),
-		phone: Joi.string()
-			.pattern(/^(\+\d{1,3})?\d{7,14}$/)
-			.required(),
-		name: Joi.string().min(2).max(50).required(),
-		lastname: Joi.string().min(2).max(50).required(),
+		email: Joi.string().required(),
+		phone: Joi.string().required(),
+		name: Joi.string().required(),
+		lastname: Joi.string().required(),
 	}).required(),
 	query: Joi.object().length(0),
 	headers: Joi.object().unknown(true),
 	file: Joi.forbidden(),
 })
-
 
 export const activateAccount = Joi.object({
   body: Joi.object({
@@ -34,14 +31,12 @@ export const login = Joi.object({
   file: Joi.forbidden()  
 });
 
-export const logout = Joi.object({
-  body: Joi.object().length(0),
-  query: Joi.object().length(0),
-  headers: Joi.object({
-    authorization: Joi.string().min(5).required()
-  }).unknown(true),
-  file: Joi.forbidden()  
-});
+export const logoutSchema = Joi.object({
+	body: Joi.object().length(0),
+	query: Joi.object().length(0),
+	headers: Joi.object().unknown(true),
+	file: Joi.forbidden(),
+})
 
 export const refreshToken = Joi.object({
   body: Joi.object({
@@ -52,3 +47,10 @@ export const refreshToken = Joi.object({
   headers: Joi.object().unknown(true),
   file: Joi.forbidden() 
 });
+
+export const getMe = Joi.object({
+	body: Joi.object().length(0),
+	query: Joi.object().length(0),
+	headers: Joi.object().unknown(true),
+	file: Joi.forbidden(),
+})

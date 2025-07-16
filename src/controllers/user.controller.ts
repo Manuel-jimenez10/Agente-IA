@@ -1,81 +1,41 @@
+import * as error from '@utils/error'
 import * as userService from '@services/user.service'
 
 export async function getUsers(): Promise<{ users: any[] }> {
 	try {
-		const users = await userService.getAllUsers([
-			'_id',
-			'email',
-			'phone',
-			'name',
-			'lastname',
-		])
+		const users = await userService.getAllUsers(['_id','email','phone','name','lastname',])
 
 		return { users }
-	} catch (error: any) {
-		throw {
-			code: 500,
-			message: error.message || 'Error al obtener usuarios',
-		}
-	}
-}  
-
-export async function getUserById(id: string): Promise<{ user: any }> {
-	try {
-		const user = await userService.getUserByIdParam(id)
-
-		if (!user) {
-			throw { code: 404, message: 'Usuario no encontrado' }
-		}
-
-		return { user }
-	} catch (error: any) {
-		throw {
-			code: 500,
-			message: error.message || 'Error al obtener usuario',
-		}
-	}
-}  
-
-export async function updateUser(
-	id: string,
-	updateData: Record<string, any>,
-): Promise<{ message: string }> {
-	try {
-		const updated = await userService.updateUserById(id, updateData)
-
-		if (!updated) {
-			throw {
-				code: 404,
-				message: 'Usuario no encontrado o sin campos válidos',
-			}
-		}
-
-		return { message: 'Datos actualizados correctamente' }
-	} catch (error: any) {
-		throw {
-			code: error.code || 500,
-			message: error.message || 'Error en la actualización',
-		}
+	} catch (e: any) {
+		throw await error.createError(e)
 	}
 }
-  
+
+export async function getUser(id: string): Promise<{ user: any }> {
+	try {
+		const user = await userService.getUser({_id: id})
+
+		return { user }
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
+export async function updateUser(id: string, updateData: Record<string, any>,): Promise<{ message: string }> {
+	try {
+		const response = await userService.updateUser(id, updateData)
+		return response
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
 
 export async function deleteUser(id: string): Promise<{ message: string }> {
 	try {
-		const deleted = await userService.deleteUserById(id)
-
-		if (!deleted) {
-			throw { code: 404, message: 'Usuario no encontrado' }
-		}
-
-		return { message: 'Usuario eliminado correctamente' }
-	} catch (error: any) {
-		throw {
-			code: error.code || 500,
-			message: error.message || 'Error al eliminar usuario',
-		}
+		const response = await userService.deleteUser(id)
+		return response
+	} catch (e: any) {
+		throw await error.createError(e)
 	}
-}  
-  
-  
+}
   

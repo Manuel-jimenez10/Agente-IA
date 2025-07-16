@@ -116,6 +116,7 @@
       "@schemas/*": ["src/schemas/*"],      
       "@interfaces/*": ["src/interfaces/*"],
       "@setup/*": ["src/setup/*"],
+      "@helpers/*": ["src/helpers/*"],
     }
   },
   "include": ["src", "src/types"]

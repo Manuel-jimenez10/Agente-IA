@@ -28,7 +28,13 @@ export const FLIGHT_BASE_API_URL = process.env.FLIGHT_BASE_API_URL as string
 export const FLIGHT_USER_TOKEN = process.env.FLIGHT_USER_TOKEN as string
 export const FLIGHT_PROJECT_UUID = process.env.FLIGHT_PROJECT_UUID as string
 export const FLIGHT_REQUEST_ID = process.env.FLIGHT_REQUEST_ID as string
-export const MAIL_USER = process.env.MAIL_USER as string 
-export const MAIL_PASS = process.env.MAIL_PASS as string
+
 export const FRONTEND_URL = process.env.FRONTEND_URL as string
 export const JWT_SECRET = process.env.JWT_SECRET as string
+export const ACTIVATION_SECRET = process.env.ACTIVATION_SECRET as string
+export const NODEMAILER_AUTH_USER = process.env.NODEMAILER_AUTH_USER as string
+export const NODEMAILER_AUTH_PASS = process.env.NODEMAILER_AUTH_PASS as string
+export const NODEMAILER_HOST = process.env.NODEMAILER_HOST as string
+export const NODEMAILER_PORT = process.env.NODEMAILER_PORT as string
+export const NODEMAILER_SECURE = process.env.NODEMAILER_SECURE as string
+export const NODEMAILER_TLS_REJECT_UNAUTHOTIZED = process.env.NODEMAILER_TLS_REJECT_UNAUTHOTIZED as string

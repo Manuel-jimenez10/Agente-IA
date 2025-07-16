@@ -4,56 +4,55 @@ import * as userSchema from '@schemas/user.schema';
 import { validateParams, verifyToken } from '@middlewares/middlewares';
 const router = Router();
 
-router.get('/', verifyToken, async (req: Request, res: Response) => {
+router.get(
+	'/', 
+	validateParams(userSchema.getUsersSchema), verifyToken,
+	async (req: Request, res: Response) => {
 	try {
 		const response = await userController.getUsers()
-		res.status(200).send(response)
-	} catch (error: any) {
-		res.status(error.code || 500).send({
-			type: 'error',
-			message: error.message || 'Error interno',
-		})
+		res.send(response)
+	}catch (e: any) {
+		res.status(e.code).send(e.message)
 	}
 })  
 
-router.get('/:id', verifyToken, async (req: Request, res: Response) => {
+router.get(
+	'/:id', 
+	validateParams(userSchema.getUserSchema), verifyToken,
+    async (req: Request, res: Response) => {
 	try {
-		const response = await userController.getUserById(req.params.id)
-		res.status(200).send(response)
-	} catch (error: any) {
-		res.status(error.code || 500).send({
-			type: 'error',
-			message: error.message || 'Error interno',
-		})
+		const response = await userController.getUser(req.params.id)
+		res.send(response)
+	} catch (e: any) {
+		res.status(e.code).send(e.message)
 	}
 })
   
 
-router.put('/:id', validateParams(userSchema.updateUserSchema), verifyToken, async (req: Request, res: Response) => {
-		try {
-			const response = await userController.updateUser(
-				req.params.id,
-				req.body,
-			)
-			res.status(200).send(response)
-		} catch (error: any) {
-			res.status(error.code || 500).send({
-				type: 'error',
-				message: error.message || 'Error al actualizar el usuario',
-			})
-		}
-	},
-)
+router.put(
+	'/:id', 
+	validateParams(userSchema.updateUserSchema), verifyToken,
+	async (req: Request, res: Response) => {
+	try {
+		const response = await userController.updateUser(
+			req.params.id,
+			req.body,
+		)
+		res.send(response)
+	} catch (e: any) {
+		res.status(e.code).send(e.message)
+	}
+})
   
-router.delete('/:id', verifyToken, async (req: Request, res: Response) => {
+router.delete(
+	'/:id',
+	validateParams(userSchema.deleteUserSchema),verifyToken, 
+	async (req: Request, res: Response) => {
 	try {
 		const response = await userController.deleteUser(req.params.id)
-		res.status(200).send(response)
-	} catch (error: any) {
-		res.status(error.code || 500).send({
-			type: 'error',
-			message: error.message || 'Error al borrar el usuario',
-		})
+		res.send(response)
+	}catch (e: any) {
+		res.status(e.code).send(e.message)
 	}
 })
 	 

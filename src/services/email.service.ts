@@ -1,23 +1,11 @@
-import { MAIL_PASS, MAIL_USER } from '@config/config'
-import nodemailer from 'nodemailer'
+import * as error from '@utils/error'
+import * as email from '@utils/email'
 
-export async function sendAccountActivationEmail(email: string, activationHash: string) {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: MAIL_USER,
-            pass: MAIL_PASS
-        }
-    });
-
-    const activationLink = `${process.env.FRONTEND_URL}/activate?hash=${activationHash}`;
-
-	await transporter.sendMail({
-		from: '"TuApp" <noreply@tuapp.com>',
-		to: email,
-		subject: 'Activa tu cuenta',
-		html: `<p>Haz clic en el siguiente enlace para activar tu cuenta:</p>
-           <a href="${activationLink}">${activationLink}</a>`,
-	});
-
+export async function sendActivationEmail(emailToSend: { from: string; to: string; subject: string; html: string; }): Promise<void> {
+	try {
+		await email.send(emailToSend)
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
 }
+  

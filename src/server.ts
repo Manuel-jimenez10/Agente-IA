@@ -1,5 +1,5 @@
 import 'module-alias/register'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import cookieParser from 'cookie-parser';
 import { initServer } from "@setup/initServer";
 import { initSocketServer } from "@setup/initSocketServer";

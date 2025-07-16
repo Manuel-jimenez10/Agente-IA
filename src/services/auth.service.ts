@@ -1,69 +1,83 @@
-import jwt from 'jsonwebtoken';
+import { Response, Request } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import * as error from '@utils/error'
+import * as config from '@config/config'
+import * as tokenUtils from '@utils/token'
+import * as userService from '@services/user.service'
+import * as emailService from '@services/email.service'
+import * as settingService from '@services/setting.service'
+import * as loginHelper from '@utils/login'
 import { authModel } from '@models/auth.model';
-import { userModel } from '@models/user.model';
-import { settingModel } from '@models/setting.model';
-import { JWT_SECRET } from '@config/config';
 
-export async function registerAuth(
-	userId: string,
-): Promise<{ id: string; now: Date }> {
+export async function register(email: string, phone: string, name: string, lastname: string): Promise<any> {
 	try {
+		const user = await userService.getUser({ email })
+		
+		if (user) {
+			throw { code: 400, message: 'Correo ya Existe' }
+		}
+
+		const userId = uuidv4()
+		const token = await tokenUtils.createActivationToken({ userId, email, phone, name, lastname })
+
+		const emailToSend = {
+			from: 'Whatsappia',
+			to: email,
+			subject: 'Activación de cuenta',
+			html: `Hola ${name}, Para activar tu cuenta, haz clic en el siguiente enlace: ${config.FRONTEND_URL}/activate-account?token=${token} Si no solicitaste este registro, ignora este correo.`,
+		}
+
+		await emailService.sendActivationEmail(emailToSend)
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
+export async function activateAccount(token: string): Promise<{ id: string }> {
+	try {
+		const { userId, email, phone, name, lastname } = await tokenUtils.verifyActivationToken(token)
 		const now = new Date()
+
 		await authModel.insertOne({ userId, createdAt: now })
-		return { id: userId, now }
-	} catch (error: any) {
-		throw { code: 500, message: error.message || 'Error en registerAuth' }
-	}
-}
-  
+		await userService.registerUser( userId, now, email, phone, name, lastname, )
+		await settingService.initializeUserSettings(userId, now)
 
-export async function login(
-	id: string,
-): Promise<{ userId: string; sessionId: string }> {
+		return { id: userId }
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}  
+
+export async function loginFlow( id: string, clientId: string, res: Response ): Promise<{ email: string; phone: string; sessionId: string; settings: any; token: string; }> {
 	try {
-		const user = await userModel.findOne({ _id: id })
+		const { userId, sessionId } = await loginHelper.login(id)
+		const response = await loginHelper.processLogin(userId, clientId, sessionId)
 
-		if (!user) {
-			throw { code: 404, message: 'Usuario no encontrado' }
-		}
+		res.cookie('accessToken', response.token, {
+			httpOnly: true,
+			secure: false,
+			maxAge: 2 * 60 * 60 * 1000,
+		})
 
-		const sessionId = uuidv4()
-		return { userId: user._id, sessionId }
-	} catch (error: any) {
-		throw { code: 500, message: error.message || 'Error en login' }
+		return response
+	} catch (e: any) {
+		throw await error.createError(e)
 	}
 }
-  
 
-export async function processLogin(
-	userId: string,
-	clientId: string,
-	sessionId: string,
-) {
+export async function getAuthenticatedUser(req: Request, ): Promise<{ user: any }> {
 	try {
-		const user = await userModel.findOne({ _id: userId })
-		const settings = await settingModel.findOne({ userId })
+		const token = req.cookies.accessToken
+		const userId = await tokenUtils.extractUserIdFromToken(token)
 
-		if (!user) {
-			throw { code: 404, message: 'Usuario no encontrado' }
+		if (!userId) {
+			throw { code: 401, message: 'No se pudo validar el usuario' }
 		}
 
-		const token = jwt.sign(
-			{ userId, clientId, sessionId },
-			JWT_SECRET as string,
-			{ expiresIn: '2h' },
-		)
+		const user = await userService.getUser({ _id: userId })
 
-		return {
-			email: user.email,
-			phone: user.phone,
-			token,
-			sessionId,
-			settings,
-		}
+		return { user }
 	} catch (error: any) {
-		throw { code: 500, message: error.message || 'Error en processLogin' };
+		throw await error.createError(error)
 	}
 }
-  

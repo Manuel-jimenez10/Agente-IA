@@ -20,11 +20,7 @@ export function validateParams(schema: ObjectSchema) {
 	}
 }
 
-export function verifyToken(
-	req: Request,
-	res: Response,
-	next: NextFunction,
-): void {
+export function verifyToken(req: Request, res: Response, next: NextFunction, ): void {
 	const token = req.cookies.accessToken
 
 	if (!token) {
@@ -33,11 +29,19 @@ export function verifyToken(
 	}
 
 	try {
-		const payload = jwt.verify(token, JWT_SECRET)
-		req.user = payload as { userId: string; clientId: string }
+		jwt.verify(token, JWT_SECRET)
 		next()
 	} catch (err) {
 		res.status(401).send('Token inválido o expirado')
 	}
 }
+
+export function clearAccessTokenCookie(req: Request, res: Response,	next: NextFunction,): void {
+	res.clearCookie('accessToken', {
+		httpOnly: true,
+		secure: false,
+	})
+	next()
+}
+  
   
