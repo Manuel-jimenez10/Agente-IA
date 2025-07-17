@@ -46,7 +46,7 @@ router.post(
 	async (req: Request, res: Response) => {
 	try {
 		const response = await authController.login(
-			req.body.id as string,
+			req.body.email as string,
 			req.body.clientId as string,
 			res
 		)
@@ -76,7 +76,8 @@ router.post(
   	try {
 		const response = await authController.refreshToken(
 			req.body.sub as string,
-			req.body.clientId as string      
+			req.body.clientId as string,
+			res      
 		);
 
     	res.send(response);     

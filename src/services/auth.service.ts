@@ -6,6 +6,8 @@ import * as tokenUtils from '@utils/token'
 import * as userService from '@services/user.service'
 import * as emailService from '@services/email.service'
 import * as settingService from '@services/setting.service'
+import * as cookieService from '@services/cookie.service';
+import * as profileService from '@services/profile.service'
 import * as loginHelper from '@utils/login'
 import { authModel } from '@models/auth.model';
 
@@ -41,6 +43,7 @@ export async function activateAccount(token: string): Promise<{ id: string }> {
 		await authModel.insertOne({ userId, createdAt: now })
 		await userService.registerUser( userId, now, email, phone, name, lastname, )
 		await settingService.initializeUserSettings(userId, now)
+		await profileService.createProfile(userId)
 
 		return { id: userId }
 	} catch (e: any) {
@@ -48,16 +51,12 @@ export async function activateAccount(token: string): Promise<{ id: string }> {
 	}
 }  
 
-export async function loginFlow( id: string, clientId: string, res: Response ): Promise<{ email: string; phone: string; sessionId: string; settings: any; token: string; }> {
+export async function loginFlow( email: string, clientId: string, res: Response ): Promise<{ email: string; phone: string; sessionId: string; settings: any; token: string; }> {
 	try {
-		const { userId, sessionId } = await loginHelper.login(id)
+		const { userId, sessionId } = await loginHelper.login(email)
 		const response = await loginHelper.processLogin(userId, clientId, sessionId)
 
-		res.cookie('accessToken', response.token, {
-			httpOnly: true,
-			secure: false,
-			maxAge: 2 * 60 * 60 * 1000,
-		})
+		await cookieService.setAccessTokenCookie(res, response.token)
 
 		return response
 	} catch (e: any) {

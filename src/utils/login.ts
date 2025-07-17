@@ -4,9 +4,9 @@ import * as userService from '@services/user.service'
 import * as settingService from '@services/setting.service'
 import * as tokenService from '@services/token.service';
 
-export async function login(id: string ): Promise<{ userId: string; sessionId: string }> {
+export async function login(email: string ): Promise<{ userId: string; sessionId: string }> {
 	try {
-		const user = await userService.getUser({ _id: id })
+		const user = await userService.getUser({ email: email })
 
 		if (!user) {
 			throw { code: 404, message: 'Usuario no encontrado' }

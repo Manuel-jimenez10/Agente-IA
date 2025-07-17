@@ -23,7 +23,7 @@ export const activateAccount = Joi.object({
 
 export const login = Joi.object({
   body: Joi.object({
-    id: Joi.string().required(),
+    email: Joi.string().required(),
     clientId: Joi.string().required()
   }).required(),
   query: Joi.object().length(0),

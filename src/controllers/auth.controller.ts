@@ -3,6 +3,7 @@ import * as error from '@utils/error'
 import * as authService from '@services/auth.service'
 import * as userService from '@services/user.service'
 import * as tokenService from '@services/token.service'
+import * as cookieService from '@services/cookie.service'
 
 export async function register(email: string, phone: string, name: string, lastname: string ): Promise<{ type: string }> {
 	try {
@@ -39,11 +40,12 @@ export async function logout(): Promise<{ type: string }> {
 	}
 }  
 
-export async function refreshToken(sub: string, clientId: string ): Promise<{ token: string }> {
+export async function refreshToken(sub: string, clientId: string, res: Response ): Promise<{token: string}> {
 	try {
 		const userId = await userService.decryptSub(sub)
 		const token = await tokenService.createAccessToken(userId, clientId)
-
+		await cookieService.setAccessTokenCookie(res, token)
+		
 		return { token }
 	} catch (e: any) {
 		throw await error.createError(e)

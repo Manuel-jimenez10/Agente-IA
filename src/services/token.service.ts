@@ -1,4 +1,4 @@
-import { JWT_SECRET } from '@config/config';
+import * as config from '@config/config'
 import jwt from 'jsonwebtoken';
 
 export async function createAccessToken(userId: string, clientId: string, sessionId?: string): Promise<string> {
@@ -8,7 +8,7 @@ export async function createAccessToken(userId: string, clientId: string, sessio
 		payload.sessionId = sessionId
 	}
 
-	return jwt.sign(payload, JWT_SECRET, {
+	return jwt.sign(payload, config.JWT_SECRET, {
 		expiresIn: '2h',
 	})
 };

@@ -31,12 +31,12 @@ export async function getAllUsers(fields: string[] = []): Promise<any[]> {
   
 export async function decryptSub(sub: string): Promise<string> {
 	try {
-		const payload = jwt.verify(sub, config.JWT_SECRET) as { sub: string }
-		return payload.sub
+		const payload = jwt.verify(sub, config.JWT_SECRET) as { userId: string }
+		return payload.userId
 	} catch (e: any) {
 		throw await error.createError(e)
 	}
-}
+}  
 
 export async function updateUser(id: string, updateData: Record<string, any>, ): Promise<{ message: string }> {
 	try {

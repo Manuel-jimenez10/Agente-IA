@@ -8,6 +8,7 @@ import cors from "cors"
 import videoRouter from '@routers/video.router'
 import authRouter from '@routers/auth.router'
 import userRouter from '@routers/user.router'
+import profileRouter from '@routers/profile.router'
 import streamingRouter from '@routers/streaming.router'
 import whatsappRouter from '@routers/whatsapp.router'
 import messageRouter from '@routers/message.router'
@@ -22,8 +23,9 @@ app.use(cookieParser())
 app.use(express.json());
 app.use(cors());
 
-app.use('/api/auth', authRouter)
-app.use('/api/users', userRouter)
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+app.use('/api/profiles', profileRouter);
 app.use('/api/videos', videoRouter);
 app.use('/api/streaming', streamingRouter);
 app.use('/api/whatsapp', whatsappRouter);
