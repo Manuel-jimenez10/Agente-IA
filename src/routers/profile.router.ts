@@ -24,7 +24,7 @@ router.get(
 		async (req: Request, res: Response) => {
 			try {
 				const response = await profileController.getProfile(
-					req.params.id,
+					req.params.id as string
 				)
 				res.send(response)
 			} catch (e: any) {
@@ -38,7 +38,9 @@ router.get(
     validateParams(profileSchema.updateProfileSchema), verifyToken,
     async (req: Request, res: Response) => {
       try {
-        const response = await profileController.updateProfile(req.params.id, req.body)
+        const response = await profileController.updateProfile(
+          req.query.id as string
+        )
         res.send(response)
       } catch (e: any) {
         res.status(e.code).send(e.message)
@@ -51,7 +53,9 @@ router.get(
     validateParams(profileSchema.deleteProfileSchema), verifyToken,
     async (req: Request, res: Response) => {
       try {
-        const response = await profileController.deleteProfile(req.params.id)
+        const response = await profileController.deleteProfile(
+          req.query.id as string
+        )
         res.send(response)
       } catch (e: any) {
         res.status(e.code).send(e.message)
