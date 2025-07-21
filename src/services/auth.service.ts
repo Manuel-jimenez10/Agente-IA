@@ -26,6 +26,25 @@ export async function registerAuth(userId: string | null, email: string | null, 
 
 }
 
+export async function updatePassword(email: string | null, encryptedPassword: string, ): Promise<void> {
+	try {
+		const result = await authModel.updateOne(
+			{ email },
+			{ password: encryptedPassword },
+		)
+
+		if (result.matchedCount === 0) {
+			throw { code: 404, message: 'USER_NOT_FOUND' }
+		}
+
+		if (result.modifiedCount === 0) {
+			throw { code: 400, message: 'PASSWORD_UPDATE_FAILED' }
+		}
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
 export async function me(userId: string ): Promise<{ user: any }> {
 	try {				
 

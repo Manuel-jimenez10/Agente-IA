@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import * as authController from '@controllers/auth.controller';
 import * as authSchema from '@schemas/auth.schema';
 import { validateParams, verifyToken } from '@middlewares/middlewares';
+import * as email from '@utils/email';
 const router = Router();
 
 router.post(
@@ -88,7 +89,8 @@ router.post(
 
 router.get(
 	'/me',
-	verifyToken, validateParams(authSchema.getMe),
+	verifyToken,
+	validateParams(authSchema.getMe),
 	async (req: Request, res: Response) => {
 	try {
 		const response = await authController.me(req.query.userId as string);
@@ -97,5 +99,37 @@ router.get(
 		res.status(e.code).send(e.message)
 	}
 })
+
+router.post(
+	'/resetPassword',
+	verifyToken, 
+	validateParams(authSchema.resetPasswordSchema),
+	async (req: Request, res: Response) => {
+	try {
+		const response = await authController.resetPassword(
+			req.body.email as string
+		)
+		res.send(response)
+	} catch (e: any) {
+		res.status(e.code || 500).send(e.message)
+	}
+})
+
+router.post(
+	'/changePassword', 
+	verifyToken,
+	validateParams(authSchema.changePasswordSchema), 
+	async (req: Request, res: Response) => {
+	try {
+		const response = await authController.changePassword(
+			req.body.token as string,
+			req.body.newPassword as string
+		)
+		res.send(response)
+	} catch (e: any) {
+		res.status(e.code || 500).send(e.message)
+	}
+})
+
 
 export default router;

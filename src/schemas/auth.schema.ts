@@ -32,6 +32,29 @@ export const login = Joi.object({
   file: Joi.forbidden()  
 });
 
+export const resetPasswordSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required()
+  }),
+  query: Joi.object().length(0),
+  params: Joi.object().length(0),
+  headers: Joi.object().unknown(true),
+});
+
+export const changePasswordSchema = Joi.object({
+  body: Joi.object({
+    token: Joi.string().required(),
+    newPassword: Joi.string()
+      .min(8)
+      .max(64)
+      .pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]+$/)
+      .required()
+  }),
+  query: Joi.object().length(0),
+  params: Joi.object().length(0),
+  headers: Joi.object().unknown(true),
+});
+
 export const logoutSchema = Joi.object({
 	body: Joi.object().length(0),
 	query: Joi.object().length(0),

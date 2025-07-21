@@ -56,3 +56,43 @@ export async function deleteUserData(activationHash: string): Promise<void> {
   }
 
 }
+
+export async function saveResetToken(email: string): Promise<string> {
+	try {
+		const tokenData = email
+		const recoveryHash = await hash.generateRandomHash(tokenData)
+		const key = `recoveryHash:${recoveryHash}`
+		const value = JSON.stringify({ email })
+		const seconds = 600
+
+		await cache.setWithExpiration(key, seconds, value)
+		return recoveryHash
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
+export async function getResetTokenData(recoveryHash: string, ): Promise<{ email: string | null }> {
+	try {
+		const key = `recoveryHash:${recoveryHash}`
+		const data = await cache.get(key)
+    
+		if (!data) {
+      throw { code: 400, message: 'ERROR_RECOVERY_HASH' }
+    }
+
+		const parsed: any = JSON.parse(data)
+		return { email: parsed?.email }
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
+export async function deleteResetToken(recoveryHash: string): Promise<void> {
+	try {
+		const key = `recoveryHash:${recoveryHash}`
+		await cache.deleteKey(key)
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}

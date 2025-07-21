@@ -79,6 +79,32 @@ export async function me(userId: string): Promise<{ user: any }> {
 		throw await error.createError(error)
 	}
 }
-  
+
+export async function resetPassword(email: string): Promise<{ type: string }> {
+  try {
+    const token = await cacheService.saveResetToken(email);
+	  await emailService.sendRecoveryEmail(email, token)
+
+	  return { type: 'success' }
+
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}
+
+export async function changePassword(token: string, newPassword: string): Promise<{ type: string }> {
+  try {
+    const { email } = await cacheService.getResetTokenData(token);
+    await cacheService.deleteResetToken(token);                    
+
+    const encryptedPassword = await authService.encryptedPassword(newPassword);
+    await authService.updatePassword(email, encryptedPassword);                
+
+    return { type: 'success' };
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}
+
   
   
