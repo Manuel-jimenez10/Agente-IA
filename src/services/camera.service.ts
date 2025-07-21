@@ -2,19 +2,18 @@ import * as error from '@utils/error'
 import { cameraModel } from '@models/camera.model'
 import { ObjectId } from 'mongodb'
 
-export async function registerCamera(cameraId: string, now: Date, name: string, location: string, status: string, ): Promise<void> {
+export async function registerCamera(name: string, location: string, status: string, ): Promise<void> {
 	try {
-		if (!cameraId || !name || !location || !status) {
+		if (!name || !location || !status) {
 			throw { code: 400, message: 'DATA_NOT_FOUND' }
 		}
 
 		await cameraModel.insertOne({
-			_id: new ObjectId(cameraId),
 			name,
 			location,
 			status,
-			createdAt: now,
-			updatedAt: now,
+			createdAt: new Date(),
+			updatedAt: new Date(),
 		})
 	} catch (e: any) {
 		throw await error.createError(e)
@@ -40,9 +39,14 @@ export async function getAllCameras(fields: string[] = []): Promise<any[]> {
 
 export async function updateCamera(id: string, updateData: Record<string, any>, ): Promise<{ message: string }> {
 	try {
+		const updatedFields = {
+			...updateData,
+			updatedAt: new Date(),
+		}
+
 		const result = await cameraModel.updateOne(
 			{ _id: new ObjectId(id) },
-			updateData,
+			updatedFields,
 		)
 		if (!result) {
 			throw {
