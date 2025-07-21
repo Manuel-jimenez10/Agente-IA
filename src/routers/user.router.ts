@@ -21,7 +21,9 @@ router.get(
 	validateParams(userSchema.getUserSchema), verifyToken,
     async (req: Request, res: Response) => {
 	try {
-		const response = await userController.getUser(req.params.id)
+		const response = await userController.getUser(
+			req.query.id as string
+		)
 		res.send(response)
 	} catch (e: any) {
 		res.status(e.code).send(e.message)
@@ -35,8 +37,7 @@ router.put(
 	async (req: Request, res: Response) => {
 	try {
 		const response = await userController.updateUser(
-			req.params.id,
-			req.body,
+			req.query.id as string,			
 		)
 		res.send(response)
 	} catch (e: any) {
@@ -49,7 +50,9 @@ router.delete(
 	validateParams(userSchema.deleteUserSchema),verifyToken, 
 	async (req: Request, res: Response) => {
 	try {
-		const response = await userController.deleteUser(req.params.id)
+		const response = await userController.deleteUser(
+			req.query.id as string
+		)
 		res.send(response)
 	}catch (e: any) {
 		res.status(e.code).send(e.message)

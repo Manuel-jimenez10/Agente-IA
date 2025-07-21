@@ -3,12 +3,19 @@ import * as error from '@utils/error'
 import * as config from '@config/config'
 import { userModel } from '@models/user.model'
 
-export async function registerUser( userId: string, now: Date, email: string, phone: string, name: string, lastname: string, ): Promise<void> {
-	try {
-		await userModel.insertOne({ _id: userId, email, phone, name, lastname, createdAt: now, isActive: true })
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
+export async function registerUser(userId: string | null, now: Date, email: string | null, phone: string | null, name: string | null, lastname: string | null): Promise<void> {
+
+  try{    
+
+    if(!userId || !email || !phone || !name || !lastname){
+      throw { code: 400, message: "DATA_NOT_FOUND" }
+    }
+
+    await userModel.insertOne({ _id: new ObjectId(userId), createdAt: now, updatedAt: now, email: email, phone: phone, name: name, lastname: lastname } )    
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
 }
 
 export async function getUser(filter: Record<string, any>): Promise<any> {

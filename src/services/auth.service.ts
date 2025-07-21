@@ -2,76 +2,37 @@ import { Response, Request } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import * as error from '@utils/error'
 import * as config from '@config/config'
-import * as tokenUtils from '@utils/token'
+import * as token from '@utils/token'
+import * as hash from '@utils/hash'
 import * as userService from '@services/user.service'
 import * as emailService from '@services/email.service'
 import * as settingService from '@services/setting.service'
 import * as cookieService from '@services/cookie.service';
 import * as profileService from '@services/profile.service'
-import * as loginHelper from '@utils/login'
 import { authModel } from '@models/auth.model';
 
-export async function register(email: string, phone: string, name: string, lastname: string): Promise<any> {
-	try {
-		const user = await userService.getUser({ email })
-		
-		if (user) {
-			throw { code: 400, message: 'Correo ya Existe' }
-		}
+export async function registerAuth(userId: string | null, email: string, password: any): Promise<{id: string, now: Date}> {
 
-		const userId = uuidv4()
-		const token = await tokenUtils.createActivationToken({ userId, email, phone, name, lastname })
+  try{
 
-		const emailToSend = {
-			from: 'Whatsappia',
-			to: email,
-			subject: 'Activación de cuenta',
-			html: `Hola ${name}, Para activar tu cuenta, haz clic en el siguiente enlace: ${config.FRONTEND_URL}/activate-account?token=${token} Si no solicitaste este registro, ignora este correo.`,
-		}
+    if(!userId){
+      throw { code: 400, message: "USERID_NOT_FOUND" }
+    }
 
-		await emailService.sendActivationEmail(emailToSend)
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
+    const now = new Date()    
+    const sessionId = await hash.generateSessionId(userId)
+    await authModel.insertOne({ createdAt: now, updatedAt: now, email: email, password: password, sessionId: sessionId, isLogged: false, userId: new ObjectId(userId) } )    
+
+    return now
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
 }
 
-export async function activateAccount(token: string): Promise<{ id: string }> {
-	try {
-		const { userId, email, phone, name, lastname } = await tokenUtils.verifyActivationToken(token)
-		const now = new Date()
-
-		await authModel.insertOne({ userId, createdAt: now })
-		await userService.registerUser( userId, now, email, phone, name, lastname, )
-		await settingService.initializeUserSettings(userId, now)
-		await profileService.createProfile(userId)
-
-		return { id: userId }
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
-}  
-
-export async function loginFlow( email: string, clientId: string, res: Response ): Promise<{ email: string; phone: string; sessionId: string; settings: any; token: string; }> {
-	try {
-		const { userId, sessionId } = await loginHelper.login(email)
-		const response = await loginHelper.processLogin(userId, clientId, sessionId)
-
-		await cookieService.setAccessTokenCookie(res, response.token)
-
-		return response
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
-}
-
-export async function getAuthenticatedUser(req: Request, ): Promise<{ user: any }> {
-	try {
-		const token = req.cookies.accessToken
-		const userId = await tokenUtils.extractUserIdFromToken(token)
-
-		if (!userId) {
-			throw { code: 401, message: 'No se pudo validar el usuario' }
-		}
+export async function me(userId: string ): Promise<{ user: any }> {
+	try {				
 
 		const user = await userService.getUser({ _id: userId })
 
@@ -79,4 +40,35 @@ export async function getAuthenticatedUser(req: Request, ): Promise<{ user: any 
 	} catch (error: any) {
 		throw await error.createError(error)
 	}
+}
+
+export async function encryptedPassword(password: string): Promise<any> {
+	try {
+		return await crypto.encryptedPassword()
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}
+
+export async function verifyCredentials(email: string, password: any) {
+
+  try{
+       
+    const auth = await authModel.findOne({ email: email } )
+
+    if(!auth){
+      throw { code: 400, message: "AUTH_ERROR" }
+    }
+
+    const res = await crypto.verifyPassword(password, auth.password)
+    if(!res){
+      throw { code: 400, message: "PASSWORD_ERROR" }
+    }
+
+    return await userModel.find({})
+    
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
 }

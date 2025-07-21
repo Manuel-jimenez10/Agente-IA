@@ -15,6 +15,7 @@ router.post(
 			req.body.phone as string,
 			req.body.name as string,
 			req.body.lastname as string,
+			req.body.password as string
 		)
 		res.send(response);
 	
@@ -30,8 +31,8 @@ router.post(
 	async (req: Request, res: Response) => {
 	try {
 		const response = await authController.activateAccount(
-		req.body.token as string        
-		);
+			req.body.token as string		
+		)
 		res.send(response);
 	
 	}catch(e: any){
@@ -47,8 +48,7 @@ router.post(
 	try {
 		const response = await authController.login(
 			req.body.email as string,
-			req.body.clientId as string,
-			res
+			req.body.password as string			
 		)
 
 		res.send(response)
@@ -59,7 +59,8 @@ router.post(
 
 router.post(
 	'/logout', 
-	verifyToken, clearAccessTokenCookie, validateParams(authSchema.logoutSchema),
+	verifyToken, 
+	validateParams(authSchema.logoutSchema),
 	async (req: Request, res: Response) => {
 	try {
 		const response = await authController.logout()
@@ -76,8 +77,7 @@ router.post(
   	try {
 		const response = await authController.refreshToken(
 			req.body.sub as string,
-			req.body.clientId as string,
-			res      
+			req.body.clientId as string,			
 		);
 
     	res.send(response);     
@@ -92,7 +92,7 @@ router.get(
 	verifyToken, validateParams(authSchema.getMe),
 	async (req: Request, res: Response) => {
 	try {
-		const response = await authController.getAuthenticatedUser(req)
+		const response = await authController.me()
 		res.send(response)
 	} catch (e: any) {
 		res.status(e.code).send(e.message)

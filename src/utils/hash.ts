@@ -37,3 +37,36 @@ export async function generateRandomName(data: string): Promise<string> {
     throw await error.createError(e)
   }
 }
+
+export async function generateSecureHash(plainText: string): Promise<string> {
+  try{
+    
+    const hashed = await argon2.hash(plainText, { type: argon2.argon2id });
+    return hashed;
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+}
+
+export async function verifySecureHash(hashedValue: string, plainText: string): Promise<boolean> {
+  try{
+    
+    const isMatch = await argon2.verify(hashedValue, plainText);
+    return isMatch;
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+}
+
+export async function generateSessionId(data: string): Promise<string> {
+  try{
+    
+    const sessionId = (await generateRandomHash(data)).substring(11,37)
+    return sessionId
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+}

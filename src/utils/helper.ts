@@ -11,3 +11,13 @@ export async function generateRandomCode() {
 	return code
 
 }
+
+export async function generateAuthKey(id: string): Promise<string>{
+
+	try{
+		return id.substring(0,10) 
+	}catch(e){
+		throw await error.createError(e)
+	}
+
+}

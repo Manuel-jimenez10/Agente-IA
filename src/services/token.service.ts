@@ -1,14 +1,28 @@
-import * as config from '@config/config'
-import jwt from 'jsonwebtoken';
+import * as error from '@utils/error'
+import * as token from '@utils/token'
 
-export async function createAccessToken(userId: string, clientId: string, sessionId?: string): Promise<string> {
-	const payload: Record<string, any> = { userId, clientId }
+export async function createToken() {
 
-	if (sessionId) {
-		payload.sessionId = sessionId
-	}
+  try{       
 
-	return jwt.sign(payload, config.JWT_SECRET, {
-		expiresIn: '2h',
-	})
-};
+    const expiresIn = '24h'
+    return await token.create(expiresIn)
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}
+
+export async function destroyToken() {
+
+  try{       
+
+    const expiresIn = '1s'
+    await token.destroy(expiresIn)
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}

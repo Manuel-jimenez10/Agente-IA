@@ -5,40 +5,61 @@ import * as userService from '@services/user.service'
 import * as tokenService from '@services/token.service'
 import * as cookieService from '@services/cookie.service'
 
-export async function register(email: string, phone: string, name: string, lastname: string ): Promise<{ type: string }> {
+export async function register(email: string, phone: string, name: string, lastname: string, password: string ): Promise<{ type: string }> {
 	try {
-		await authService.register(email, phone, name, lastname)
-		return { type: 'success' }
+
+		const encryptedPassword = await authService.encryptedPassword(password)
+		const activationHash = await cacheService.saveUserData(email, phone, name, lastname, encryptedPassword)
+    	await emailService.sendAccountActivationEmail(email, activationHash)    
+
+    	return { type: "success" }
 	} catch (e: any) {
 		throw await error.createError(e)
 	}
 }
 
-export async function activateAccount(token: string): Promise<{ id: string }> {
-	try {
-		const response = await authService.activateAccount(token)
-		return response
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
-}  
+export async function activateAccount(activationHash: string): Promise<{id: string}> {
 
-export async function login(id: string, clientId: string, res: Response, ): Promise<{ email: string; phone: string; sessionId: string; settings: any; token: string }> {
-	try {
-		const response = await authService.loginFlow(id, clientId, res)
-		return response
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
+  try{
+
+    const { userId, email, phone, name, lastname, password } = await cacheService.getUserDataByActivationHash(activationHash)    
+    await cacheService.deleteUserData(activationHash)    
+    const { id, now } = await authService.registerAuth(userId, email, password)    
+    await userService.registerUser(userId, now, phone, name, lastname)    
+    
+    return { type: "success" }
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
 }
 
-export async function logout(): Promise<{ type: string }> {
-	try {
-		return { type: 'success' }
-	} catch (e: any) {
-		throw await error.createError(e)
-	}
-}  
+export async function login(email: string, password: string): Promise<any> {
+
+  try{
+                  
+    const user = await authService.verifyCredentials(email, password)
+    const token = await tokenService.createToken()
+
+    return { email, token }
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}
+
+export async function logout() {
+
+  try{            
+    await tokenService.destroyToken();
+    return { type: "success" }
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}
 
 export async function refreshToken(sub: string, clientId: string, res: Response ): Promise<{token: string}> {
 	try {
