@@ -1,3 +1,4 @@
+import argon2 from 'argon2';
 import * as error from '@utils/error'
 import { keccak256 } from 'js-sha3';
 import dayjs from 'dayjs';

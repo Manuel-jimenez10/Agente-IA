@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import * as error from '@utils/error'
 import * as config from '@config/config'
 import { userModel } from '@models/user.model'
+import { ObjectId } from 'mongodb'
 
 export async function registerUser(userId: string | null, now: Date, email: string | null, phone: string | null, name: string | null, lastname: string | null): Promise<void> {
 
@@ -47,7 +48,7 @@ export async function decryptSub(sub: string): Promise<string> {
 
 export async function updateUser(id: string, updateData: Record<string, any>, ): Promise<{ message: string }> {
 	try {
-		const result = await userModel.updateOne({ _id: id }, updateData)
+		const result = await userModel.updateOne({ _id: new ObjectId(id) }, updateData)
 		if (!result) {
 			throw {
 				code: 404,
@@ -62,7 +63,7 @@ export async function updateUser(id: string, updateData: Record<string, any>, ):
 
 export async function deleteUser(id: string): Promise<{ message: string }> {
 	try {
-		const result = await userModel.deleteOne({ _id: id })
+		const result = await userModel.deleteOne({ _id: new ObjectId(id) })
 		if (!result) {
 			throw { code: 404, message: 'Usuario no encontrado' }
 		}

@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
 import * as error from '@utils/error'
 import * as authService from '@services/auth.service'
 import * as userService from '@services/user.service'
 import * as tokenService from '@services/token.service'
-import * as cookieService from '@services/cookie.service'
+import * as cacheService from '@services/cache.service'
+import * as emailService from '@services/email.service'
 
 export async function register(email: string, phone: string, name: string, lastname: string, password: string ): Promise<{ type: string }> {
 	try {
@@ -18,14 +18,14 @@ export async function register(email: string, phone: string, name: string, lastn
 	}
 }
 
-export async function activateAccount(activationHash: string): Promise<{id: string}> {
+export async function activateAccount(activationHash: string): Promise<{type: string}> {
 
   try{
 
     const { userId, email, phone, name, lastname, password } = await cacheService.getUserDataByActivationHash(activationHash)    
     await cacheService.deleteUserData(activationHash)    
     const { id, now } = await authService.registerAuth(userId, email, password)    
-    await userService.registerUser(userId, now, phone, name, lastname)    
+    await userService.registerUser(userId, now, email, phone, name, lastname)    
     
     return { type: "success" }
 
@@ -40,7 +40,7 @@ export async function login(email: string, password: string): Promise<any> {
   try{
                   
     const user = await authService.verifyCredentials(email, password)
-    const token = await tokenService.createToken()
+    const token = await tokenService.createToken({ userId: user._id.toString() })
 
     return { email, token }
 
@@ -61,11 +61,10 @@ export async function logout() {
 
 }
 
-export async function refreshToken(sub: string, clientId: string, res: Response ): Promise<{token: string}> {
+export async function refreshToken(sub: string): Promise<{token: string}> {
 	try {
 		const userId = await userService.decryptSub(sub)
-		const token = await tokenService.createAccessToken(userId, clientId)
-		await cookieService.setAccessTokenCookie(res, token)
+		const token = await tokenService.createToken({ userId })
 		
 		return { token }
 	} catch (e: any) {
@@ -73,9 +72,9 @@ export async function refreshToken(sub: string, clientId: string, res: Response 
 	}
 }
 
-export async function getAuthenticatedUser(req: Request): Promise<{ user: any }> {
+export async function me(userId: string): Promise<{ user: any }> {
 	try {
-		return await authService.getAuthenticatedUser(req)
+		return await authService.me(userId)
 	} catch (error: any) {
 		throw await error.createError(error)
 	}

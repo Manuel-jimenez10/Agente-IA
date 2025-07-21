@@ -6,6 +6,7 @@ export const register = Joi.object({
 		phone: Joi.string().required(),
 		name: Joi.string().required(),
 		lastname: Joi.string().required(),
+		password: Joi.string().required(),
 	}).required(),
 	query: Joi.object().length(0),
 	headers: Joi.object().unknown(true),
@@ -24,7 +25,7 @@ export const activateAccount = Joi.object({
 export const login = Joi.object({
   body: Joi.object({
     email: Joi.string().required(),
-    clientId: Joi.string().required()
+    password: Joi.string().required()
   }).required(),
   query: Joi.object().length(0),
   headers: Joi.object().unknown(true),
@@ -40,8 +41,7 @@ export const logoutSchema = Joi.object({
 
 export const refreshToken = Joi.object({
   body: Joi.object({
-    sub: Joi.string().min(5).required(),
-    clientId: Joi.string().required()
+    sub: Joi.string().min(5).required()
   }).required(),
   query: Joi.object().length(0),
   headers: Joi.object().unknown(true),
@@ -50,7 +50,9 @@ export const refreshToken = Joi.object({
 
 export const getMe = Joi.object({
 	body: Joi.object().length(0),
-	query: Joi.object().length(0),
+	query: Joi.object({
+		userId: Joi.string().required()
+	}),
 	headers: Joi.object().unknown(true),
 	file: Joi.forbidden(),
 })

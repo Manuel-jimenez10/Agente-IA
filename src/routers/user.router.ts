@@ -17,27 +17,25 @@ router.get(
 })  
 
 router.get(
-	'/:id', 
+	'/find', 
 	validateParams(userSchema.getUserSchema), verifyToken,
     async (req: Request, res: Response) => {
 	try {
-		const response = await userController.getUser(
-			req.query.id as string
-		)
+		const response = await userController.getUser(req.query.id as string);
 		res.send(response)
 	} catch (e: any) {
 		res.status(e.code).send(e.message)
 	}
 })
-  
 
 router.put(
-	'/:id', 
+	'/find', 
 	validateParams(userSchema.updateUserSchema), verifyToken,
 	async (req: Request, res: Response) => {
 	try {
 		const response = await userController.updateUser(
-			req.query.id as string,			
+			req.query.id as string,
+			req.body			
 		)
 		res.send(response)
 	} catch (e: any) {
@@ -46,7 +44,7 @@ router.put(
 })
   
 router.delete(
-	'/:id',
+	'/find',
 	validateParams(userSchema.deleteUserSchema),verifyToken, 
 	async (req: Request, res: Response) => {
 	try {

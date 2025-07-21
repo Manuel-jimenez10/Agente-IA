@@ -38,3 +38,4 @@ export const NODEMAILER_HOST = process.env.NODEMAILER_HOST as string
 export const NODEMAILER_PORT = process.env.NODEMAILER_PORT as string
 export const NODEMAILER_SECURE = process.env.NODEMAILER_SECURE as string
 export const NODEMAILER_TLS_REJECT_UNAUTHOTIZED = process.env.NODEMAILER_TLS_REJECT_UNAUTHOTIZED as string
+export const NODEMAILER_FROM_NAME = process.env.NODEMAILER_FROM_NAME as string

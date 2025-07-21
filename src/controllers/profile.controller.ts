@@ -17,6 +17,14 @@ export async function getProfile(userId: string): Promise<{userId: string; bio: 
 	}
 }
 
+export async function createProfile(userId: string): Promise<{ message: string }> {
+  try {
+    return await profileService.createProfile(userId)
+  } catch (e: any) {
+    throw await error.createError(e)
+  }
+}
+
 export async function updateProfile(userId: string, updateData: Record<string, any> ): Promise<{ message: string }> {
 	try {
 		await profileService.updateProfile(userId, updateData)

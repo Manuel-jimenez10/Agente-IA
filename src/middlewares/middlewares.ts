@@ -21,12 +21,14 @@ export function validateParams(schema: ObjectSchema) {
 }
 
 export function verifyToken(req: Request, res: Response, next: NextFunction, ): void {
-	const token = req.cookies.accessToken
+	const authHeader = req.headers.authorization
 
-	if (!token) {
+	if (!authHeader || !authHeader.startsWith('Bearer ')) {
 		res.status(401).send('Token no proporcionado')
 		return
 	}
+
+	const token = authHeader.split(' ')[1]
 
 	try {
 		jwt.verify(token, JWT_SECRET)
@@ -34,14 +36,6 @@ export function verifyToken(req: Request, res: Response, next: NextFunction, ): 
 	} catch (err) {
 		res.status(401).send('Token inválido o expirado')
 	}
-}
-
-export function clearAccessTokenCookie(req: Request, res: Response,	next: NextFunction,): void {
-	res.clearCookie('accessToken', {
-		httpOnly: true,
-		secure: false,
-	})
-	next()
 }
   
   

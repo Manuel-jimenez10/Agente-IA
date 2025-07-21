@@ -17,14 +17,30 @@ router.get(
       }
     }
   )
-  
+
+  router.post(
+    '/create',
+    validateParams(profileSchema.createProfileSchema),
+    verifyToken,
+    async (req: Request, res: Response) => {
+      try {
+        const response = await profileController.createProfile(
+          req.body.userId,
+        )
+        res.status(201).send(response)
+      } catch (e: any) {
+        res.status(e.code || 500).send(e.message)
+      }
+    },
+  )
+
   router.get(
-		'/:id',
+		'/find',
 		validateParams(profileSchema.profileSchema), verifyToken,
 		async (req: Request, res: Response) => {
 			try {
 				const response = await profileController.getProfile(
-					req.params.id as string
+					req.query.id as string
 				)
 				res.send(response)
 			} catch (e: any) {
@@ -34,12 +50,13 @@ router.get(
   )
   
   router.put(
-    '/:id',
+    '/find',
     validateParams(profileSchema.updateProfileSchema), verifyToken,
     async (req: Request, res: Response) => {
       try {
         const response = await profileController.updateProfile(
-          req.query.id as string
+          req.query.id as string,
+          req.body
         )
         res.send(response)
       } catch (e: any) {
@@ -49,7 +66,7 @@ router.get(
   )
 
   router.delete(
-    '/:id',
+    '/find',
     validateParams(profileSchema.deleteProfileSchema), verifyToken,
     async (req: Request, res: Response) => {
       try {

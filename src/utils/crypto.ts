@@ -1,6 +1,5 @@
 import * as error from '@utils/error'
 import * as crypto from 'crypto';
-import * as config from '@config/config'
 import bcrypt from 'bcrypt';
 
 export async function encrypt(text: string, secretKey: string, salt: string): Promise<string> {

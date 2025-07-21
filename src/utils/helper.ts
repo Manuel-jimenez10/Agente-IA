@@ -1,3 +1,4 @@
+import * as error from './error';
 import { randomInt, createHash } from 'crypto';
 import dayjs from 'dayjs';
 

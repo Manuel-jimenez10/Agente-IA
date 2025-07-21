@@ -1,10 +1,10 @@
 import Joi from 'joi'
 
 export const getUserSchema = Joi.object({
-	params: Joi.object({
-		id: Joi.string().length(24).required(),
+	query: Joi.object({
+		id: Joi.string().required()
 	}),
-	query: Joi.object().length(0),
+	params: Joi.object().length(0),
 	body: Joi.object().length(0),
 	headers: Joi.object().unknown(true),
 })
@@ -26,18 +26,18 @@ export const updateUserSchema = Joi.object({
 	})
 		.min(1)
 		.required(),
-	params: Joi.object({
-		id: Joi.string().length(24).required(),
+	params: Joi.object().length(0),
+	query: Joi.object({
+		id: Joi.string().required(),
 	}),
-	query: Joi.object().length(0),
 	headers: Joi.object().unknown(true),
 })
 
 export const deleteUserSchema = Joi.object({
-	params: Joi.object({
-		id: Joi.string().length(24).required(),
+	params: Joi.object().length(0),
+	query: Joi.object({
+		id: Joi.string().required(),
 	}),
-	query: Joi.object().length(0),
 	body: Joi.object().length(0),
 	headers: Joi.object().unknown(true),
 })

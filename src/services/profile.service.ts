@@ -1,13 +1,16 @@
 import * as error from '@utils/error';
 import { profileModel } from '@models/profile.model';
 
-export async function createProfile(userId: string): Promise<void> {
-    try {
-        await profileModel.insertOne({ userId, bio: '', avatarUrl: '', location: '', social: {}, createdAt: new Date() });
-    } catch (e: any) {
-        throw await error.createError(e)
-    }
+export async function createProfile(userId: string): Promise<{ message: string }> {
+  try {
+    await profileModel.insertOne({ userId, bio: '', avatarUrl: '', location: '', social: {}, createdAt: new Date(), });
+
+    return { message: 'Perfil creado correctamente' }
+  } catch (e: any) {
+    throw await error.createError(e)
+  }
 }
+
 
 export async function getProfiles(): Promise<any> {
 	try {

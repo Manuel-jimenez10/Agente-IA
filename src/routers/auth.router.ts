@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import * as authController from '@controllers/auth.controller';
 import * as authSchema from '@schemas/auth.schema';
-import { validateParams, verifyToken, clearAccessTokenCookie } from '@middlewares/middlewares';
+import { validateParams, verifyToken } from '@middlewares/middlewares';
 const router = Router();
 
 router.post(
@@ -76,8 +76,7 @@ router.post(
   	async (req: Request, res: Response) => {
   	try {
 		const response = await authController.refreshToken(
-			req.body.sub as string,
-			req.body.clientId as string,			
+			req.body.sub as string,		
 		);
 
     	res.send(response);     
@@ -92,7 +91,7 @@ router.get(
 	verifyToken, validateParams(authSchema.getMe),
 	async (req: Request, res: Response) => {
 	try {
-		const response = await authController.me()
+		const response = await authController.me(req.query.userId as string);
 		res.send(response)
 	} catch (e: any) {
 		res.status(e.code).send(e.message)

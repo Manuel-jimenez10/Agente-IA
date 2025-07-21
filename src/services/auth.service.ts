@@ -1,17 +1,12 @@
-import { Response, Request } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import * as error from '@utils/error'
-import * as config from '@config/config'
-import * as token from '@utils/token'
 import * as hash from '@utils/hash'
 import * as userService from '@services/user.service'
-import * as emailService from '@services/email.service'
-import * as settingService from '@services/setting.service'
-import * as cookieService from '@services/cookie.service';
-import * as profileService from '@services/profile.service'
+import * as crypto from '@utils/crypto'
 import { authModel } from '@models/auth.model';
+import { userModel } from '@models/user.model';
+import { ObjectId } from 'mongodb';
 
-export async function registerAuth(userId: string | null, email: string, password: any): Promise<{id: string, now: Date}> {
+export async function registerAuth(userId: string | null, email: string | null, password: any): Promise<{id: string, now: Date}> {
 
   try{
 
@@ -23,7 +18,7 @@ export async function registerAuth(userId: string | null, email: string, passwor
     const sessionId = await hash.generateSessionId(userId)
     await authModel.insertOne({ createdAt: now, updatedAt: now, email: email, password: password, sessionId: sessionId, isLogged: false, userId: new ObjectId(userId) } )    
 
-    return now
+    return { id: sessionId, now }
 
   }catch(e: any){
     throw await error.createError(e)
@@ -34,7 +29,7 @@ export async function registerAuth(userId: string | null, email: string, passwor
 export async function me(userId: string ): Promise<{ user: any }> {
 	try {				
 
-		const user = await userService.getUser({ _id: userId })
+		const user = await userService.getUser({ _id: new ObjectId(userId) })
 
 		return { user }
 	} catch (error: any) {
@@ -44,7 +39,7 @@ export async function me(userId: string ): Promise<{ user: any }> {
 
 export async function encryptedPassword(password: string): Promise<any> {
 	try {
-		return await crypto.encryptedPassword()
+		return await crypto.encryptPassword(password)
 	} catch (e: any) {
 		throw await error.createError(e)
 	}
@@ -65,7 +60,7 @@ export async function verifyCredentials(email: string, password: any) {
       throw { code: 400, message: "PASSWORD_ERROR" }
     }
 
-    return await userModel.find({})
+    return await userModel.findOne({ email: email})
     
   }catch(e: any){
     throw await error.createError(e)

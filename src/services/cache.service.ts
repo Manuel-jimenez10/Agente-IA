@@ -23,7 +23,7 @@ export async function saveUserData(email: string, phone: string, name: string, l
 
 }
 
-export async function getUserDataByActivationHash(activationHash: string): Promise<{ userId: string | null, email: string | null, phone: string | null }> {
+export async function getUserDataByActivationHash(activationHash: string): Promise<{ userId: string | null, email: string | null, phone: string | null, name: string | null, lastname: string | null, password: string | null }> {
 
   try{
 

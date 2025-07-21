@@ -1,5 +1,6 @@
 import * as error from '@utils/error'
 import * as userService from '@services/user.service'
+import { ObjectId } from 'mongodb'
 
 export async function getUsers(): Promise<{ users: any[] }> {
 	try {
@@ -13,7 +14,7 @@ export async function getUsers(): Promise<{ users: any[] }> {
 
 export async function getUser(id: string): Promise<{ user: any }> {
 	try {
-		const user = await userService.getUser({_id: id})
+		const user = await userService.getUser({_id: new ObjectId(id)})
 
 		return { user }
 	} catch (e: any) {

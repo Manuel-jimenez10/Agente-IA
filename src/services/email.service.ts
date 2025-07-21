@@ -1,12 +1,11 @@
 import * as error from '@utils/error'
 import * as email from '@utils/email'
 import * as config from '@config/config'
-import * as hash from '@utils/hash'
 
 export async function sendAccountActivationEmail(_email: string, activationHash: string): Promise<void>{
 
   try{
-    const from = `Aigis ${config.NODEMAILER_FROM}`
+    const from = `Aigis ${config.NODEMAILER_FROM_NAME}`
     const to = _email
     const subject = "Activa tu cuenta"
     const data = _email    

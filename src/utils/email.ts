@@ -6,19 +6,21 @@ export async function send(from: string, to: string, subject: string, html: stri
 
   try{
     
-    const transporter = nodemailer.createTransport({        
-      service: "gmail",
-      host: config.NODEMAILER_HOST,
-      port: config.NODEMAILER_PORT,
-      secure: (config.NODEMAILER_SECURE.toLowerCase() === 'true'), // SSL
-      auth: {
-        user: config.NODEMAILER_AUTH_USER,
-        pass: config.NODEMAILER_AUTH_PASS,
-      },
-      tls: {
-        rejectUnauthorized: (config.NODEMAILER_TLS_REJECT_UNAUTHOTIZED.toLowerCase() === 'true') // Ignorar certificados autofirmados
-      }
-    });        
+    const transporter = nodemailer.createTransport({
+    service: 'gmail',
+		host: config.NODEMAILER_HOST,
+		port: config.NODEMAILER_PORT,
+		secure: config.NODEMAILER_SECURE.toLowerCase() === 'true',
+		auth: {
+			user: config.NODEMAILER_AUTH_USER,
+			pass: config.NODEMAILER_AUTH_PASS,
+		},
+		tls: {
+			rejectUnauthorized:
+				config.NODEMAILER_TLS_REJECT_UNAUTHOTIZED.toLowerCase() ===
+				'true',
+		},
+	} as nodemailer.TransportOptions)        
        
     transporter.sendMail({
       from: from,
