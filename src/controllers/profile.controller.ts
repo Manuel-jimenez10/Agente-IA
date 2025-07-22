@@ -1,7 +1,7 @@
 import * as error from '@utils/error';
 import * as profileService from '@services/profile.service';
 
-export async function getProfiles(): Promise<{userId: string; bio: string; avatarUrl: string; location: string; social: Record<string, any>; createdAt: Date; }[]> {
+export async function getProfiles(): Promise<{userId: string; bio: string; avatar: string; location: string; social: Record<string, any>; createdAt: Date; }[]> {
 	try {
 		return await profileService.getProfiles()
 	} catch (e: any) {
@@ -9,7 +9,7 @@ export async function getProfiles(): Promise<{userId: string; bio: string; avata
 	}
 }
 
-export async function getProfile(userId: string): Promise<{userId: string; bio: string; avatarUrl: string; location: string; social: Record<string, any>; createdAt: Date;}> {
+export async function getProfile(userId: string): Promise<{userId: string; bio: string; avatar: string; location: string; social: Record<string, any>; createdAt: Date;}> {
 	try {
 		return await profileService.getProfile(userId)
 	} catch (e: any) {
@@ -43,19 +43,19 @@ export async function deleteProfile(userId: string, ): Promise<{ message: string
 	}
 }
 
-export async function uploadAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatarUrl: string }> {
+export async function uploadAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatar: string }> {
   try {
-    const avatarUrl = await profileService.uploadAvatar(userId, file);
-    return { message: 'Avatar subido exitosamente', avatarUrl };
+    const avatar = await profileService.uploadAvatar(userId, file);
+    return { message: 'Avatar subido exitosamente', avatar };
   } catch (e: any) {
     throw await error.createError(e);
   }
 }
 
-export async function updateAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatarUrl: string }> {
+export async function updateAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatar: string }> {
   try {
-    const avatarUrl = await profileService.updateAvatar(userId, file);
-    return { message: 'Avatar actualizado correctamente', avatarUrl };
+    const avatar = await profileService.updateAvatar(userId, file);
+    return { message: 'Avatar actualizado correctamente', avatar };
   } catch (e: any) {
     throw await error.createError(e);
   }

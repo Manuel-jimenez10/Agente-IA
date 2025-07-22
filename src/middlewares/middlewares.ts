@@ -1,11 +1,8 @@
 import jwt from 'jsonwebtoken';
 import multer from 'multer'
-import path from 'path'
-import fs from 'fs'
 import { Request, Response, NextFunction } from 'express';
 import { ObjectSchema } from 'joi';
 import { JWT_SECRET } from '@config/config';
-import * as generator from '@utils/generator';
 
 export function validateParams(schema: ObjectSchema) {
 	return (req: Request, res: Response, next: NextFunction) => {
@@ -42,24 +39,8 @@ export function verifyToken(req: Request, res: Response, next: NextFunction, ): 
 	}
 }
 
-const avatarDir = path.join(process.cwd(), 'storage/avatars')
-if (!fs.existsSync(avatarDir)) fs.mkdirSync(avatarDir, { recursive: true })
-
-const storage = multer.diskStorage({
-	destination: avatarDir,
-	filename: async (_req, file, cb) => {
-		try {
-			const ext = path.extname(file.originalname).toLowerCase()
-			cb(null, `${ await generator.generateFileId()}${ext}`)
-		} catch {
-			cb(new Error('ERROR_GENERANDO_NOMBRE_DE_ARCHIVO'), '')
-		}
-	},
-})
-
 export const uploadAvatar = multer({
-	storage,
+	storage: multer.memoryStorage(),
 	limits: { fileSize: 2 * 1024 * 1024 },
 })
-
   

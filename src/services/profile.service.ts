@@ -1,8 +1,9 @@
-import * as error from '@utils/error';
 import path from 'path';
 import fs from 'fs/promises';
-import { profileModel } from '@models/profile.model';
+import * as error from '@utils/error';
 import * as avatar from '@utils/avatar';
+import * as generator from '@utils/generator';
+import { profileModel } from '@models/profile.model';
 
 export async function createProfile(userId: string): Promise<{ message: string }> {
   try {
@@ -62,12 +63,19 @@ export async function deleteProfile(userId: string): Promise<any> {
 
 export async function uploadAvatar(userId: string, file: Express.Multer.File): Promise<string> {
   try {
-    await avatar.validateAvatarFile(file);
-    await profileModel.updateOne(
-      { userId },
-      { avatarUrl: file.filename, updatedAt: new Date() }
-    );
-    return file.filename;
+		await avatar.validateAvatarFile(file)
+
+		const ext = path.extname(file.originalname).toLowerCase()
+		const fileId = `${await generator.generateFileId()}${ext}`
+		const filePath = path.join(process.cwd(), 'storage/avatars', fileId)
+
+		await fs.writeFile(filePath, file.buffer)
+
+		await profileModel.updateOne(
+			{ userId },
+			{ avatar: fileId, updatedAt: new Date() },
+		)
+		return fileId
   } catch (e: any) {
     throw await error.createError(e);
   }
@@ -75,23 +83,33 @@ export async function uploadAvatar(userId: string, file: Express.Multer.File): P
 
 export async function updateAvatar(userId: string, file: Express.Multer.File): Promise<string> {
   try {
-    await avatar.validateAvatarFile(file);
-    const profile = await profileModel.findOne({ userId });
-    if (!profile) {
-		  throw { code: 404, message: 'Perfil no encontrado' };
-	  }
+		await avatar.validateAvatarFile(file)
+		const profile = await profileModel.findOne({ userId })
+		if (!profile) {
+			throw { code: 404, message: 'Perfil no encontrado' }
+		}
 
-    if (profile.avatarUrl) {
-      const oldPath = path.join(process.cwd(), 'storage/avatars', profile.avatarUrl);
-      await fs.rm(oldPath, { force: true });
-    }
+		if (profile.avatar) {
+			const oldPath = path.join(
+				process.cwd(),
+				'storage/avatars',
+				profile.avatar,
+			)
+			await fs.rm(oldPath, { force: true })
+		}
 
-    await profileModel.updateOne(
-      { userId },
-      { avatarUrl: file.filename, updatedAt: new Date() }
-    );
+		const ext = path.extname(file.originalname).toLowerCase()
+		const fileId = `${await generator.generateFileId()}${ext}`
+		const filePath = path.join(process.cwd(), 'storage/avatars', fileId)
 
-    return file.filename;
+		await fs.writeFile(filePath, file.buffer)
+
+		await profileModel.updateOne(
+			{ userId },
+			{ avatar: fileId, updatedAt: new Date() },
+		)
+
+		return fileId 
   } catch (e: any) {
     throw await error.createError(e);
   }
@@ -100,7 +118,7 @@ export async function updateAvatar(userId: string, file: Express.Multer.File): P
 export async function deleteAvatar(userId: string): Promise<{ message: string }> {
   try {
     const profile = await profileModel.findOne({ userId });
-    if (!profile || !profile.avatarUrl) {
+    if (!profile || !profile.avatar) {
       throw { code: 404, message: 'No hay avatar que eliminar' };
     }
 
@@ -109,7 +127,7 @@ export async function deleteAvatar(userId: string): Promise<{ message: string }>
 
     await profileModel.updateOne(
       { userId },
-      { avatarUrl: '', updatedAt: new Date() }
+      { avatar: '', updatedAt: new Date() }
     );
 
     return { message: 'Avatar eliminado correctamente' };
