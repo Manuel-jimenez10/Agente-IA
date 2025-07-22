@@ -39,6 +39,7 @@ app.use('/api/operators', operatorRouter)
 app.use('/api/officers', officerRouter)
 app.use('/api/patrolcars', patrolcarRouter)
 app.use('/api/profiles', profileRouter);
+app.use('/avatars', express.static('storage/avatars'))
 app.use('/api/videos', videoRouter);
 app.use('/api/streaming', streamingRouter);
 app.use('/api/whatsapp', whatsappRouter);

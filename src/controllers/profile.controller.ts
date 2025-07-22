@@ -42,3 +42,29 @@ export async function deleteProfile(userId: string, ): Promise<{ message: string
 		throw await error.createError(e)
 	}
 }
+
+export async function uploadAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatarUrl: string }> {
+  try {
+    const avatarUrl = await profileService.uploadAvatar(userId, file);
+    return { message: 'Avatar subido exitosamente', avatarUrl };
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}
+
+export async function updateAvatar(userId: string, file: Express.Multer.File): Promise<{ message: string; avatarUrl: string }> {
+  try {
+    const avatarUrl = await profileService.updateAvatar(userId, file);
+    return { message: 'Avatar actualizado correctamente', avatarUrl };
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}
+
+export async function deleteAvatar(userId: string): Promise<{ message: string }> {
+  try {
+    return await profileService.deleteAvatar(userId);
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}

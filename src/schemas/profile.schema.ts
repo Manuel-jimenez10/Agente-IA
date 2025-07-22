@@ -32,7 +32,7 @@ export const updateProfileSchema = Joi.object({
 	}),
 	body: Joi.object({
 		bio: Joi.string().max(500).optional(),
-		avatarUrl: Joi.string().uri().optional(),
+		avatar: Joi.string().uri().optional(),
 		location: Joi.string().max(100).optional(),
 		social: Joi.object().optional(),
 	})

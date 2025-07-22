@@ -1,7 +1,8 @@
 import { Request, Response, Router } from 'express';
-import { validateParams, verifyToken } from '@middlewares/middlewares';
+import { uploadAvatar, validateParams, verifyToken } from '@middlewares/middlewares';
 import * as profileController from '@controllers/profile.controller';
 import * as profileSchema from '@schemas/profile.schema';
+import * as avatarSchema from '@schemas/avatar.schema'
 
 const router = Router();
 
@@ -79,5 +80,57 @@ router.get(
       }
     }
   )  
+
+router.post(
+	'/avatar',
+	uploadAvatar.single('avatar'),
+	validateParams(avatarSchema.avatarSchema),
+	verifyToken,
+	async (req: Request, res: Response) => {
+		try {
+			const result = await profileController.uploadAvatar(
+				req.query.id as string,
+				req.file as Express.Multer.File,
+			)
+			res.status(201).send(result)
+		} catch (e: any) {
+			res.status(e.code).send(e.message)
+		}
+	},
+)
+
+router.put(
+	'/avatar',
+	uploadAvatar.single('avatar'),
+	validateParams(avatarSchema.updateAvatarSchema),
+	verifyToken,
+	async (req: Request, res: Response) => {
+		try {
+			const result = await profileController.updateAvatar(
+				req.query.id as string,
+				req.file as Express.Multer.File,
+			)
+			res.send(result)
+		} catch (e: any) {
+			res.status(e.code).send(e.message)
+		}
+	},
+)
+
+router.delete(
+	'/avatar',
+	validateParams(avatarSchema.deleteAvatarSchema),
+	verifyToken,
+	async (req: Request, res: Response) => {
+		try {
+			const result = await profileController.deleteAvatar(
+				req.query.id as string,
+			)
+			res.send(result)
+		} catch (e: any) {
+			res.status(e.code).send(e.message)
+		}
+	},
+)
 
 export default router;
