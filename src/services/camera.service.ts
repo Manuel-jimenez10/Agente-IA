@@ -71,4 +71,11 @@ export async function deleteCamera(id: string): Promise<{ message: string }> {
 		throw await error.createError(e)
 	}
 }
-  
+
+export async function getCameraCount(): Promise<number> {
+	try {
+		return await cameraModel.findCount({})
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}

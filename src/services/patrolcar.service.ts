@@ -2,7 +2,7 @@ import * as error from '@utils/error'
 import { patrolcarModel } from '@models/patrolcar.model'
 import { ObjectId } from 'mongodb'
 
-export async function registerPatrolCar(plateNumber: string, unit: string, type: string, status: string, assignedOfficerId?: string ): Promise<void> {
+export async function registerPatrolcar(plateNumber: string, unit: string, type: string, status: string, assignedOfficerId?: string ): Promise<void> {
   try {
     if (!plateNumber || !unit || !type || !status) {
       throw { code: 400, message: "DATA_NOT_FOUND" };
@@ -27,7 +27,7 @@ export async function registerPatrolCar(plateNumber: string, unit: string, type:
   }
 }
 
-export async function getPatrolCar(filter: Record<string, any>): Promise<any> {
+export async function getPatrolcar(filter: Record<string, any>): Promise<any> {
   try {
     const patrolCar = await patrolcarModel.findOne(filter);
     return patrolCar || null;
@@ -36,7 +36,7 @@ export async function getPatrolCar(filter: Record<string, any>): Promise<any> {
   }
 }
 
-export async function getAllPatrolCars(fields: string[] = []): Promise<any[]> {
+export async function getAllPatrolcars(fields: string[] = []): Promise<any[]> {
   try {
     return await patrolcarModel.find({}, fields);
   } catch (e: any) {
@@ -44,7 +44,7 @@ export async function getAllPatrolCars(fields: string[] = []): Promise<any[]> {
   }
 }
 
-export async function updatePatrolCar(id: string, updateData: Record<string, any>): Promise<{ message: string }> {
+export async function updatePatrolcar(id: string, updateData: Record<string, any>): Promise<{ message: string }> {
   try {
     	const updatedFields = {
 				...updateData,
@@ -60,7 +60,7 @@ export async function updatePatrolCar(id: string, updateData: Record<string, any
   }
 }
 
-export async function deletePatrolCar(id: string): Promise<{ message: string }> {
+export async function deletePatrolcar(id: string): Promise<{ message: string }> {
   try {
     const result = await patrolcarModel.deleteOne({ _id: new ObjectId(id) });
     if (!result) {
@@ -70,4 +70,12 @@ export async function deletePatrolCar(id: string): Promise<{ message: string }> 
   } catch (e: any) {
     throw await error.createError(e);
   }
+}
+
+export async function getPatrolcarCount(): Promise<number> {
+	try {
+		return await patrolcarModel.findCount({})
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
 }

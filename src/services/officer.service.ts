@@ -67,3 +67,11 @@ export async function deleteOfficer(id: string): Promise<{ message: string }> {
     throw await error.createError(e);
   }
 }
+
+export async function getOfficerCount(): Promise<number> {
+	try {
+		return await officerModel.findCount({})
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}

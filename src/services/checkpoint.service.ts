@@ -70,4 +70,27 @@ export async function deleteCheckpoint(id: string): Promise<{ message: string }>
   }
 }
 
-  
+export async function getCheckpointCount(): Promise<number> {
+  try {
+    return await checkpointModel.findCount({})
+  } catch (e: any) {
+    throw await error.createError(e)
+  }
+}
+
+export async function getDashboardCheckpoints(): Promise<Array<{ name: string; operators: string[]; reportedCases: number; attendedPercent: number; }>> {
+  try {
+    const checkpoints = await checkpointModel.find({});
+
+    return checkpoints.map((cp: any) => ({
+      name: cp.name,
+      operators: cp.operators || [],
+      reportedCases: cp.casesTotal || 0,
+      attendedPercent: cp.casesTotal > 0
+        ? Math.round((cp.casesAttended / cp.casesTotal) * 100)
+        : 0
+    }));
+  } catch (e: any) {
+    throw await error.createError(e);
+  }
+}

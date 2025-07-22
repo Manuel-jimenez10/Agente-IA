@@ -80,3 +80,11 @@ export async function deleteOperator(id: string): Promise<{ message: string }> {
 		throw await error.createError(e)
 	}
 }
+
+export async function getOperatorCount(): Promise<number> {
+	try {
+		return await operatorModel.findCount({})
+	} catch (e: any) {
+		throw await error.createError(e)
+	}
+}

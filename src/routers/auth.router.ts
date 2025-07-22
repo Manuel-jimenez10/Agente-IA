@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import * as authController from '@controllers/auth.controller';
 import * as authSchema from '@schemas/auth.schema';
 import { validateParams, verifyToken } from '@middlewares/middlewares';
-import * as email from '@utils/email';
+
 const router = Router();
 
 router.post(
