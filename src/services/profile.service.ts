@@ -122,7 +122,7 @@ export async function deleteAvatar(userId: string): Promise<{ message: string }>
       throw { code: 404, message: 'No hay avatar que eliminar' };
     }
 
-    const filePath = path.join(process.cwd(), 'storage/avatars', profile.avatarUrl);
+    const filePath = path.join(process.cwd(), 'storage/avatars', profile.avatar);
     await fs.rm(filePath, { force: true });
 
     await profileModel.updateOne(
