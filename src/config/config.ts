@@ -31,7 +31,6 @@ export const FLIGHT_REQUEST_ID = process.env.FLIGHT_REQUEST_ID as string
 
 export const FRONTEND_URL = process.env.FRONTEND_URL as string
 export const JWT_SECRET = process.env.JWT_SECRET as string
-export const ACTIVATION_SECRET = process.env.ACTIVATION_SECRET as string
 export const NODEMAILER_AUTH_USER = process.env.NODEMAILER_AUTH_USER as string
 export const NODEMAILER_AUTH_PASS = process.env.NODEMAILER_AUTH_PASS as string
 export const NODEMAILER_HOST = process.env.NODEMAILER_HOST as string

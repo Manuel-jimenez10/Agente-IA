@@ -51,7 +51,7 @@ export async function sendRecoveryEmail(_email: string, recoveryToken: string,):
 		const from = `Aigis ${config.NODEMAILER_FROM_NAME}`
 		const to = _email
 		const subject = 'Recuperación de contraseña'
-		const recoveryLink = `${config.FRONTEND_URL}/change-password?token=${recoveryToken}`
+		const recoveryLink = `${config.FRONTEND_URL}/change-password/${recoveryToken}`
 
 		const html = `
       <html>

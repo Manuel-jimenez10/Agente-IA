@@ -102,7 +102,6 @@ router.get(
 
 router.post(
 	'/resetPassword',
-	verifyToken, 
 	validateParams(authSchema.resetPasswordSchema),
 	async (req: Request, res: Response) => {
 	try {
@@ -116,8 +115,7 @@ router.post(
 })
 
 router.post(
-	'/changePassword', 
-	verifyToken,
+	'/changePassword',
 	validateParams(authSchema.changePasswordSchema), 
 	async (req: Request, res: Response) => {
 	try {
