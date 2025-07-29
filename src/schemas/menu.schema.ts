@@ -9,7 +9,6 @@ export const getMenuByRole = Joi.object({
 	file: Joi.forbidden(),
 })
 
-
 export const assignModule = Joi.object({
 	body: Joi.object({
 		role: Joi.string().required(),

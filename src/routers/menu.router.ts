@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 import { validateParams, verifyToken } from '@middlewares/middlewares'
 import * as menuSchema from '@schemas/menu.schema'
 import * as menuController from '@controllers/menu.controller'
 
-const router = express.Router()
+const router = Router()
 
 router.get(
 	'/rol',
