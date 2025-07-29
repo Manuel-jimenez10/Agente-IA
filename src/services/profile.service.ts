@@ -4,10 +4,11 @@ import * as error from '@utils/error';
 import * as avatar from '@utils/avatar';
 import * as generator from '@utils/generator';
 import { profileModel } from '@models/profile.model';
+import { roleModel } from '@models/role.model';
 
-export async function createProfile(userId: string): Promise<{ message: string }> {
+export async function createProfile(userId: string, role = 'guest'): Promise<{ message: string }> {
   try {
-    await profileModel.insertOne({ userId, bio: '', avatar: '', location: '', social: {}, createdAt: new Date(), });
+    await profileModel.insertOne({ userId, bio: '', avatar: '', location: '', social: {}, role, createdAt: new Date(), });
 
     return { message: 'Perfil creado correctamente' }
   } catch (e: any) {
@@ -36,8 +37,17 @@ export async function getProfile(userId: string): Promise<any> {
 	}
 }
 
-export async function updateProfile(userId: string, updateData: Record<string, any>,): Promise<any> {
+export async function updateProfile(userId: string, updateData: Record<string, any>, ): Promise<any> {
 	try {
+		if (updateData.role) {
+			const validRoles = await roleModel.find({})
+			const roleNames = validRoles.map((r) => r.name)
+
+			if (!roleNames.includes(updateData.role.toLowerCase().trim())) {
+				throw { code: 400, message: 'Rol no válido' }
+			}
+		}
+
 		const result = await profileModel.updateOne({ userId }, updateData)
 		if (!result) {
 			throw {
@@ -45,6 +55,8 @@ export async function updateProfile(userId: string, updateData: Record<string, a
 				message: 'Perfil no encontrado o sin campos válidos',
 			}
 		}
+
+		return result
 	} catch (e: any) {
 		throw await error.createError(e)
 	}

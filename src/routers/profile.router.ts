@@ -26,7 +26,8 @@ router.get(
     async (req: Request, res: Response) => {
       try {
         const response = await profileController.createProfile(
-          req.body.userId,
+          req.body.userId as string,
+          req.body.role ?? 'guest' as string
         )
         res.status(201).send(response)
       } catch (e: any) {
@@ -52,7 +53,8 @@ router.get(
   
   router.put(
     '/find',
-    validateParams(profileSchema.updateProfileSchema), verifyToken,
+    validateParams(profileSchema.updateProfileSchema), 
+    verifyToken,
     async (req: Request, res: Response) => {
       try {
         const response = await profileController.updateProfile(

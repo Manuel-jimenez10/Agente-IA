@@ -35,6 +35,7 @@ export const updateProfileSchema = Joi.object({
 		avatar: Joi.string().uri().optional(),
 		location: Joi.string().max(100).optional(),
 		social: Joi.object().optional(),
+		role: Joi.string().optional(),
 	})
 		.min(1)
 		.required(),

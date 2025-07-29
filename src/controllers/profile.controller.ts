@@ -17,9 +17,9 @@ export async function getProfile(userId: string): Promise<{userId: string; bio: 
 	}
 }
 
-export async function createProfile(userId: string): Promise<{ message: string }> {
+export async function createProfile(userId: string, role: string): Promise<{ message: string }> {
   try {
-    return await profileService.createProfile(userId)
+    return await profileService.createProfile(userId, role)
   } catch (e: any) {
     throw await error.createError(e)
   }

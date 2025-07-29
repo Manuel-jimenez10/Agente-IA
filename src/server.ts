@@ -19,7 +19,7 @@ import checkpointRouter from '@routers/checkpoint.router'
 import officerRouter from '@routers/officer.router'
 import patrolcarRouter from '@routers/patrolcar.router'
 import operatorRouter from '@routers/operator.router'
-
+import menuRouter from '@routers/menu.router'
 
 process.env.TZ = 'UTC';
 
@@ -39,6 +39,7 @@ app.use('/api/operators', operatorRouter)
 app.use('/api/officers', officerRouter)
 app.use('/api/patrolcars', patrolcarRouter)
 app.use('/api/profiles', profileRouter);
+app.use('/api/menu', menuRouter)
 app.use('/avatars', express.static('storage/avatars'))
 app.use('/api/videos', videoRouter);
 app.use('/api/streaming', streamingRouter);
