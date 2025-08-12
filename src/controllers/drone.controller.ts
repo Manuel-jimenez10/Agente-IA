@@ -11,6 +11,7 @@ export async function fly(longitude: string, latitude: string): Promise<any> {
     const token = await droneService.getProjectStsToken()
     const objectKey = await droneService.uploadFileToS3WithSTS(token.data)    
     const data = await droneService.finishUploadWayline(objectKey)    
+    await droneService.flightTask(data.uuid)
 
     return { type: "success" }
 

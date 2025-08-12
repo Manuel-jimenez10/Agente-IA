@@ -146,3 +146,40 @@ export async function finishUploadWayline(objectKey: string): Promise<any> {
   }
 
 }
+
+export async function flightTask(wayline_uuid: string): Promise<any> {
+
+  try{    
+        
+    const response = await axios({
+      method: 'post',
+      url: `${config.FLIGHT_BASE_API_URL}/flight-task`,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Token': config.FLIGHT_USER_TOKEN,
+        'X-Request-Id': config.FLIGHT_REQUEST_ID,
+        'X-Project-Uuid': config.FLIGHT_PROJECT_UUID,
+      },
+      data: {
+        name: "testborrar_v4",
+        sn: "7CTXM8Q00B00S5",
+        time_zone: "America/Argentina/Buenos_Aires",
+        wayline_uuid: wayline_uuid,
+        rth_altitude: 120,
+        rth_mode: "optimal",
+        wayline_precision_type: "rtk",
+        out_of_control_action_in_flight: "return_home",
+        resumable_status: "manual",
+        task_type: "immediate",
+        repeat_type: "nonrepeating",
+        min_battery_capacity: 60
+      }
+    });
+
+    console.log('Response:', response.data);
+  
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}
