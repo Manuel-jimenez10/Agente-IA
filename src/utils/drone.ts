@@ -8,27 +8,33 @@ export async function modifyCoordinates(filePath: string, longitude: string, lat
   try{    
         
     const xmlContent = await readFile(filePath, 'utf-8');
-    const parsed = await parseStringPromise(xmlContent, { explicitArray: false });
+    const parsed = await parseStringPromise(xmlContent, { explicitArray: false, trim: true });
 
-    const placemarks = parsed.kml.Document.Folder.Placemark;
+    let count = 0;
+    (function update(node: any) {
+      if (!node || typeof node !== 'object') return;
 
-    if (!placemarks || placemarks.length < 2) {
-      console.error('No second Placemark found.');
-      return;
-    }
+      for (const key in node) {
+        const val = node[key];
+        if (key === 'coordinates' && typeof val === 'string') {
+          const parts = val.split(',').map(s => s.trim());
+          const alt = parts[2] ? `,${parts[2]}` : '';
+          node[key] = `${longitude},${latitude}${alt}`;
+          count++;
+        } else if (Array.isArray(val)) {
+          val.forEach(update);
+        } else if (typeof val === 'object') {
+          update(val);
+        }
+      }
+    })(parsed);
 
-    const secondPlacemark = Array.isArray(placemarks) ? placemarks[1] : null;
-    if (!secondPlacemark?.Point?.coordinates) {
-      console.error('Second Placemark does not have coordinates.');
-      return;
-    }
+  if (count === 0) {
+    console.warn('No coordinates found.');
+  }
 
-    secondPlacemark.Point.coordinates = `${longitude},${latitude}`;
-
-    const builder = new Builder();
-    const updatedXml = builder.buildObject(parsed);
-
-    await writeFile(filePath, updatedXml);
+  const builder = new Builder({ xmldec: { version: '1.0', encoding: 'UTF-8' }, renderOpts: { pretty: true } });
+  await writeFile(filePath, builder.buildObject(parsed), 'utf-8');
   
   }catch(e: any){
     throw await error.createError(e)
