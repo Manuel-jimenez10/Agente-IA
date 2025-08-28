@@ -1,3 +1,4 @@
+import * as error from './error';
 import { randomInt, createHash } from 'crypto';
 import dayjs from 'dayjs';
 
@@ -9,5 +10,15 @@ export async function generateRandomCode() {
 	const code = hash.substring(25, 45)
 
 	return code
+
+}
+
+export async function generateAuthKey(id: string): Promise<string>{
+
+	try{
+		return id.substring(0,10) 
+	}catch(e){
+		throw await error.createError(e)
+	}
 
 }

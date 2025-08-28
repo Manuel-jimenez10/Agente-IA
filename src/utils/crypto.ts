@@ -1,6 +1,6 @@
 import * as error from '@utils/error'
 import * as crypto from 'crypto';
-import * as config from '@config/config'
+import bcrypt from 'bcrypt';
 
 export async function encrypt(text: string, secretKey: string, salt: string): Promise<string> {
 
@@ -38,5 +38,30 @@ export async function decrypt(encryptedText: string, secretKey: string, salt: st
 	}catch(e: any){
 		throw await error.createError(e)
 	}
+
+}
+
+export async function encryptPassword(password: string) {
+
+  try{
+
+    const salt = await bcrypt.genSalt(10);
+    const encryptedPassword = await bcrypt.hash(password, salt);
+
+    return encryptedPassword
+
+  }catch(e: any){
+    throw await error.createError(e)
+  }
+
+}
+
+export async function verifyPassword(password: string, encryptedPassword: string) {
+
+  try{       
+    return await bcrypt.compare(password, encryptedPassword)    
+  }catch(e: any){
+    throw await error.createError(e)
+  }
 
 }
