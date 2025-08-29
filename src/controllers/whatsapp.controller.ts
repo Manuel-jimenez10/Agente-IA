@@ -16,10 +16,7 @@ export async function verifyWebhook(mode: string, token: string, challenge: stri
 export async function handleWebhook(object: string, metadata: any, profile: any, messages: any) {
    
   try{
-    
-    // Verifica si el número de teléfono esta en la lista blanca
-    await whatsappService.isWhitelisted(messages[0].from)
-
+        
     await whatsappService.verifyMessage(object, messages)      
     await whatsappService.sendTypingIfText(messages[0].from, messages[0].id, messages[0].type);    
 
