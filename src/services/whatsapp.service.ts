@@ -49,7 +49,7 @@ export async function saveMessage(message: any): Promise<any>{
         }
       ];
 
-      const description = await llm.generateResponse(messages, base64Image)
+      const description = await llm.generateResponse(messages)
 
       content = { 
         ...(message.image.caption ? { caption: message.image.caption } 
