@@ -173,11 +173,13 @@ export async function generateResponse(message: any): Promise<any> {
       const _response = await llm.generateResponse(messages);
 
       if (_response.intent === "datosPersonales") {
+
         try {
           // Busca el contacto por whatsapp.phone
           let contact = await contactModel.findOne({
             "whatsapp.phone": message.from,
           });
+
 
           const { name, surname, address, whatsapp } = _response;
           const { latitude, longitude } = message.content;
@@ -194,6 +196,8 @@ export async function generateResponse(message: any): Promise<any> {
               },
               createdAt: new Date(),
             };
+
+
             await contactModel.insertOne(contact);
           } else {
             // Si existe, lo actualiza
@@ -205,7 +209,7 @@ export async function generateResponse(message: any): Promise<any> {
                 address: address || contact.address || "",
                 whatsapp: {
                   username:
-                    whatsapp?.username || contact.whatsapp?.username || "",
+                     whatsapp?.username || message.username || contact.whatsapp?.username || "",
                   phone: message.from,
                 },
               }
