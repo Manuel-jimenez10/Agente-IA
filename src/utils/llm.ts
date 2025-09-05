@@ -104,6 +104,10 @@ export async function getSystemContext(): Promise<string> {
   - El campo "reply" debe contener el texto que el agente debe responder al usuario.
 
   **IMPORTANTE:**  
+  - Nunca rellenes "name", "surname" o "whatsapp.username" automáticamente usando información del usuario de WhatsApp.
+  - Solo asigna valores a estos campos si la intención es "datosPersonales" y el usuario te proporcionó explícitamente los datos.
+  - Para cualquier mensaje que no sea de tipo "datosPersonales", los campos deben permanecer vacíos:
+
   Si la intención es "datosPersonales", el JSON de respuesta debe incluir SIEMPRE los campos "name", "surname", "address" y "whatsapp" (aunque estén vacíos si no se detectan). Ejemplo:
   {
     "intent": "datosPersonales",
