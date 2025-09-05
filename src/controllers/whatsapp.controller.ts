@@ -16,14 +16,17 @@ export async function verifyWebhook(mode: string, token: string, challenge: stri
 export async function handleWebhook(object: string, metadata: any, profile: any, messages: any) {
    
   try{
-        
+    // Verifica si el número de teléfono esta en la lista blanca
+    // await whatsappService.isWhitelisted(messages[0].from)
     await whatsappService.verifyMessage(object, messages)      
     await whatsappService.sendTypingIfText(messages[0].from, messages[0].id, messages[0].type);    
 
     const _message = await whatsappService.saveMessage(messages[0])      
     await socketService.emitMessage(_message)
       
-    const response = await llmService.generateResponse(_message)      
+    const contactWithProfile = { ..._message, username: profile?.name || "" }
+
+    const response = await llmService.generateResponse(contactWithProfile)      
 
     await whatsappService.saveResponse(response)      
     await socketService.sendMessageToClient(_message) // Alerta y ubicación
@@ -31,7 +34,9 @@ export async function handleWebhook(object: string, metadata: any, profile: any,
     await whatsappService.sendMessage(response, _message.from)      
     await socketService.emitResponse(response)
 
-  }catch(e: any){                 
+  }catch(e: any){   
+    console.log(e);
+                  
     throw await error.createError(e)
   }
 

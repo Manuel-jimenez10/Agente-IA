@@ -9,6 +9,7 @@ import OpenAI from "openai";
 import * as hash from '@utils/hash'
 import * as audio from '@utils/audio'
 import fs from 'fs';
+import { contactModel } from '@models/contact.model'
 
 export async function generateResponse(message: any): Promise<any> {
       
@@ -63,7 +64,7 @@ export async function generateResponse(message: any): Promise<any> {
           }
         ];
 
-        const _response = await llm.generateResponse(messages, base64Image) as any
+        const _response = await llm.generateResponse(messages) as any
 
         response.contentType = "image"
         response.content = {
@@ -134,17 +135,54 @@ export async function generateResponse(message: any): Promise<any> {
       });    
 
       // Llamamos al modelo con el array estructurado
-      const _response = await llm.generateResponse(messages);      
+      const _response = await llm.generateResponse(messages);   
+         
+       if (_response.intent === "datosPersonales") {
+  try {
+    // Busca el contacto por whatsapp.phone
+    let contact = await contactModel.findOne({ "whatsapp.phone": message.from });
 
+    const { name, surname, address, whatsapp } = _response;
+    const { latitude, longitude } = message.content;
+
+    if (!contact) {
+      // Si no existe, lo crea
+      const newContact = {
+        name: name || "",
+        surname: surname || "",
+        address: address ||  { latitude, longitude } || "",
+        whatsapp: {
+          username: message.username || "",
+          phone: message.from,
+        },
+        createdAt: new Date(),
+      };
+      await contactModel.insertOne(newContact);
+    } else {
+      // Si existe, lo actualiza
+      const updateResult = await contactModel.updateOne(
+        { "whatsapp.phone": message.from },
+        {
+          name: name || contact.name || "",
+          surname: surname || contact.surname || "",
+          address: address || contact.address || "",
+          whatsapp: {
+            username: whatsapp?.username || contact.whatsapp?.username || "",
+            phone: message.from,
+          },
+        }
+      );
+    }
+  } catch (err) {
+    console.error("Error guardando datos personales:", err);
+  }
+}
       // Verificar si el agente detectó datos personales
-
-
-
 
       response.contentType = message.contentType
 
       if( message.contentType === "text" ){
-        response.content = { body: _response }
+        response.content = { body: _response.reply }
         return response
       }
 
@@ -186,7 +224,7 @@ export async function generateResponse(message: any): Promise<any> {
           }
         ];
 
-        _response = await llm.generateResponse(messages, base64Image) as any        
+        _response = await llm.generateResponse(messages) as any        
       }else{
         _response = "¿Qué deseas saber de la imágen?"        
       }
@@ -199,12 +237,56 @@ export async function generateResponse(message: any): Promise<any> {
 
     // Respuesta para la ubicación dle usuario por Whatsapp
     if( message.contentType == "location" ){
-        const _response = "Ubicación enviada"
-       
-        response.contentType = message.contentType
-        response.content = message.content
+        try {
+    const { latitude, longitude } = message.content.location;
 
-        return response
+    // Busca el contacto por whatsapp.phone
+    let contact = await contactModel.findOne({ "whatsapp.phone": message.from });
+
+    if (!contact) {
+      // Si no existe, lo crea
+      const newContact = {
+        name: "",
+        surname: "",
+        address: { latitude, longitude },
+        whatsapp: {
+          username: message.username || "",
+          phone: message.from,
+        },
+        createdAt: new Date(),
+      };
+      await contactModel.insertOne(newContact);
+    } else {
+      // Si existe, lo actualiza
+      const updateResult = await contactModel.updateOne(
+        { "whatsapp.phone": message.from },
+        {
+          address: { latitude, longitude },
+        }
+      );
+    }
+
+    // Prepara el mensaje para el LLM usando el systemContext y el mensaje real
+    const systemContext = await llm.getSystemContext();
+    const messages: OpenAI.ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: systemContext.trim(),
+      },
+      {
+        role: "user",
+        content: "[Ubicación compartida]" 
+      }
+    ];
+
+    const _response = await llm.generateResponse(messages);
+
+    response.contentType = "text";
+    response.content = { body: _response.reply };
+    return response;
+  } catch (err) {
+    console.error("Error guardando ubicación:", err);
+  }
     }
    
   }catch(e: any){    
