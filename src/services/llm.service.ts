@@ -170,12 +170,6 @@ export async function generateResponse(message: any): Promise<any> {
       });
 
       // Llamamos al modelo con el array estructurado
-      const _response = await llm.generateResponse(messages);   
-         
-       if (_response.intent === "datosPersonales") {
-  try {
-    // Busca el contacto por whatsapp.phone
-    let contact = await contactModel.findOne({ "whatsapp.phone": message.from });
       const _response = await llm.generateResponse(messages);
 
       if (_response.intent === "datosPersonales") {
@@ -226,43 +220,9 @@ export async function generateResponse(message: any): Promise<any> {
         }
       }
 
-    const { name, surname, address, whatsapp } = _response;
-    const { latitude, longitude } = message.content;
-
-    if (!contact) {
-      // Si no existe, lo crea
-      const newContact = {
-        name: name || "",
-        surname: surname || "",
-        address: address ||  { latitude, longitude } || "",
-        whatsapp: {
-          username: message.username || "",
-          phone: message.from,
-        },
-        createdAt: new Date(),
-      };
-      await contactModel.insertOne(newContact);
-    } else {
-      // Si existe, lo actualiza
-      const updateResult = await contactModel.updateOne(
-        { "whatsapp.phone": message.from },
-        {
-          name: name || contact.name || "",
-          surname: surname || contact.surname || "",
-          address: address || contact.address || "",
-          whatsapp: {
-            username: whatsapp?.username || contact.whatsapp?.username || "",
-            phone: message.from,
-          },
-        }
-      );
-    }
-  } catch (err) {
-    console.error("Error guardando datos personales:", err);
-  }
-}
       // Verificar si el agente detectó datos personales
       response.contentType = message.contentType;
+
       if (message.contentType === "text") {
         response.content = { body: _response.reply };
         return response;
@@ -325,7 +285,6 @@ export async function generateResponse(message: any): Promise<any> {
           },
         ];
 
-
         _response = (await llm.generateResponse(messages)) as any;
       } else {
         _response = "¿Qué deseas saber de la imágen?";
@@ -336,6 +295,7 @@ export async function generateResponse(message: any): Promise<any> {
 
       return response;
     }
+
     // Respuesta para la ubicación del usuario por Whatsapp
     if (message.contentType == "location") {
       try {

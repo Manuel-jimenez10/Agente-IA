@@ -1,6 +1,9 @@
+
 import * as error from "@utils/error";
 import * as config from "@config/config";
 import OpenAI from "openai";
+import { contactModel } from "@models/contact.model"; // Modelo de contactos
+import { UpdateOptions } from "mongodb";
 
 export async function generateResponse(
   messages: OpenAI.ChatCompletionMessageParam[]
@@ -87,29 +90,50 @@ export async function getSystemContext(): Promise<string> {
           Claro, cálido y humano. Nunca técnico o frío.
           Frases cortas (3-4 oraciones).
           Empático y resolutivo.
-          Sin rodeos, sin repetir frases innecesarias.
 
-    `
+          Tu tarea es analizar el mensaje del usuario y devolver SIEMPRE en JSON con dos campos:
+  {
+    "intent":
+      "datosPersonales" |
+      "otro",
+    "reply": "texto que debe responder el agente"
+  }
+  - Si el mensaje contiene un número entero positivo o frases como "orden X", "número de orden X", interpretá que el usuario está registrando un votante y asigna la intención "registroVotante".
+  - Si el mensaje contiene "me llamo, mi nombre es, soy, mi dirección es, vivo en, mi domicilio es", interpretá que el usuario está proporcionando datos personales y asigna la intención "datosPersonales".
+  - En todos los demás casos, asigná la intención "otro".
+  - El campo "reply" debe contener el texto que el agente debe responder al usuario.
 
-    /*
-       Al generar una respuesta, hacelo en dos partes:
-      1. Respuesta para el usuario: texto cálido y natural que se le envía por WhatsApp.
-      2. Datos personales detectados (si los hay): devolvélos como JSON con el siguiente formato, en un bloque separado por una línea en blanco:
+  **IMPORTANTE:**  
+  Si la intención es "datosPersonales", el JSON de respuesta debe incluir SIEMPRE los campos "name", "surname", "address" y "whatsapp" (aunque estén vacíos si no se detectan). Ejemplo:
+  {
+    "intent": "datosPersonales",
+    "reply": "¡Gracias! Guardé tus datos.",
+    "name": "Juan",
+    "surname": "Pérez",
+    "address": "Calle Falsa 123",
+    "whatsapp": {
+      "username": "Juan",
+      "phone": "5491123456789"
+    }
+      Registro de datos personales:
 
-      identity: {
-        name: "<nombre>",
-        surname: "<apellido>",
-        address: "<dirección>",
-        email: "<email>"
+      Si el usuario te envia un mensaje con su nombre, apellido o direccion debes enviarlo en formato json con los siguientes campos: 
+
+      {
+      "name": "nombre del usuario",
+      "surname": "apellido del usuario",
+      "address": "direccion del usuario",
+      "whatsapp": {
+          "username": "nombre de usuario de whatsapp",
+          "phone": "numero de telefono del usuario"
+        }
       }
-
-      Si detectás solo uno o algunos de los campos (por ejemplo, solo el nombre o solo la dirección), devolvé igualmente el bloque identity con los datos que tengas, y dejá los demás como "".
-      Nunca omitas este bloque si detectás al menos un dato personal.
-    */
-
-    return systemContext
-
-  }catch(e: any){
-    throw await error.createError(e)
+        - El campo "address" puede ser un string con la dirección escrita o un objeto con { latitude, longitude } si el usuario envió su ubicación por GPS.
+        - Si "address" es un objeto, devolvelo tal cual en el JSON de respuesta y al referirte a la dirección en la respuesta al usuario, mencioná que es la ubicación GPS proporcionada.
+        - Siempre incluí el campo "address" en el JSON de salida.
+  `;
+    return systemContext;
+  } catch (e: any) {
+    throw await error.createError(e);
   }
 }
