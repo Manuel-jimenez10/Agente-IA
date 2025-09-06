@@ -179,49 +179,6 @@ export async function generateResponse(message: any): Promise<any> {
       // Llamamos al modelo con el array estructurado
       const _response = await llm.generateResponse(messages);
 
-      if (_response.intent === "datosPersonales") {
-        try {
-          // Busca el contacto por whatsapp.phone
-          let contact = await contactModel.findOne({
-            "whatsapp.phone": message.from,
-          });
-
-          const { name, surname, address, whatsapp } = _response;
-          const { latitude, longitude } = message.content;
-
-          if (!contact) {
-            // Si no existe, lo crea
-            const newContact = {
-              name: name || "",
-              surname: surname || "",
-              address: address || { latitude, longitude } || "",
-              whatsapp: {
-                username: message.username || "",
-                phone: message.from,
-              },
-              createdAt: new Date(),
-            };
-            await contactModel.insertOne(newContact);
-          } else {
-            // Si existe, lo actualiza
-            const updateResult = await contactModel.updateOne(
-              { "whatsapp.phone": message.from },
-              {
-                name: name || contact.name || "",
-                surname: surname || contact.surname || "",
-                address: address || contact.address || "",
-                whatsapp: {
-                  username:
-                    whatsapp?.username || contact.whatsapp?.username || "",
-                  phone: message.from,
-                },
-              }
-            );
-          }
-        } catch (err) {
-          console.error("Error guardando datos personales:", err);
-        }
-      }
       // Solo guardar username cuando la intención es "datosPersonales"
       if (_response.intent === "datosPersonales") {
         try {
@@ -239,7 +196,7 @@ export async function generateResponse(message: any): Promise<any> {
                 address ||
                 (latitude && longitude ? { latitude, longitude } : ""),
               whatsapp: {
-                username: whatsapp?.username || "", // ya no usamos message.username directamente
+                username: whatsapp?.username || message.username || "", // 👈 usar username del LLM si lo dio, sino el de whatsapp
                 phone: message.from,
               },
               createdAt: new Date(),
@@ -254,7 +211,7 @@ export async function generateResponse(message: any): Promise<any> {
                 address: address || contact.address || "",
                 whatsapp: {
                   username:
-                    whatsapp?.username || contact.whatsapp?.username || "",
+                    whatsapp?.username || contact.whatsapp?.username || message.username || "",
                   phone: message.from,
                 },
               }
@@ -344,6 +301,7 @@ export async function generateResponse(message: any): Promise<any> {
     // Respuesta para la ubicación del usuario por Whatsapp
     if (message.contentType == "location") {
       try {
+
         const { latitude, longitude } = message.content.location;
 
         // Busca el contacto por whatsapp.phone
@@ -358,7 +316,7 @@ export async function generateResponse(message: any): Promise<any> {
             surname: "",
             address: { latitude, longitude },
             whatsapp: {
-              username: message.username || "",
+              username: contact?.whatsapp?.username || message.username || "",
               phone: message.from,
             },
             createdAt: new Date(),

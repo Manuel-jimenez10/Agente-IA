@@ -60,6 +60,9 @@ export async function getSystemContext(): Promise<string> {
             Si tenés nombre y apellido responde por ejemplo:
             “¡Hola (nombre y apellido del cliente)! ¿Me podrías indicar si estás usando WhatsApp Web o la app en el teléfono? Así te explico cómo compartir tu dirección.”
 
+            Si tenés solo la direccion, GPS o escrita responde por ejemplo:
+            “¡Hola (pregunta siempre por su nombre, nunca lo llames por su username de whatsapp)! Me podrias indicar tu nombre y apellido para registrarlos?” 
+
         Si ya tenés los tres datos:
         “¡Hola Juan! ¿En qué puedo ayudarte hoy?”
 
