@@ -149,73 +149,85 @@ export async function generateResponse(message: any): Promise<any> {
           ? "[Ubicación compartida]"
           : "";
 
-      // Agregamos SIEMPRE los datos del contacto actualizados
-      messages.push({
-        role: "user",
-        content: JSON.stringify({
-          note:
-            message.contentType === "location" ? "[Ubicación compartida]" : "",
-          name: contact?.name || "",
-          surname: contact?.surname || "",
-          address: contact?.address || {
-            latitude: message.content?.latitude || "",
-            longitude: message.content?.longitude || "",
-          },
-          whatsapp: contact?.whatsapp || {
-            username: "",
-            phone: message.from,
-          },
-          messageContent: newMessageContent,
-        }),
-      });
-
-            // Llamamos al modelo con el array estructurado
-      const _response = await llm.generateResponse(messages);   
-         
-      if (_response.intent === "datosPersonales") {
-  try {
-    // Busca el contacto por whatsapp.phone
-    let contact = await contactModel.findOne({ "whatsapp.phone": message.from });
-
-    const { name, surname, address, whatsapp } = _response;
-    const { latitude, longitude } = message.content;
-
-    if (!contact) {
-      // Si no existe, lo crea
-      const newContact = {
-        name: name || "",
-        surname: surname || "",
-        address: address ||  { latitude, longitude } || "",
+      // 🔒 Agregamos los datos del contacto al prompt de manera segura
+      const safeContactData = {
+        note:
+          message.contentType === "location" ? "[Ubicación compartida]" : "",
+        // 👇 Solo pasamos el name/surname/address si ya existen en DB
+        name: contact?.name || "",
+        surname: contact?.surname || "",
+        address:
+          contact?.address ||
+          (message.contentType === "location"
+            ? {
+                latitude: message.content?.latitude || "",
+                longitude: message.content?.longitude || "",
+              }
+            : ""),
         whatsapp: {
-          username: message.username || "",
+          username: contact?.whatsapp?.username || "", // 👈 nunca usamos message.username directo
           phone: message.from,
         },
-        createdAt: new Date(),
+        messageContent: newMessageContent,
       };
-      await contactModel.insertOne(newContact);
-    } else {
-      // Si existe, lo actualiza
-      const updateResult = await contactModel.updateOne(
-        { "whatsapp.phone": message.from },
-        {
-          name: name || contact.name || "",
-          surname: surname || contact.surname || "",
-          address: address || contact.address || "",
-          whatsapp: {
-            username: whatsapp?.username || contact.whatsapp?.username || "",
-            phone: message.from,
-          },
+
+      messages.push({
+        role: "user",
+        content: JSON.stringify(safeContactData),
+      });
+
+      // Llamamos al modelo con el array estructurado
+      const _response = await llm.generateResponse(messages);
+
+      if (_response.intent === "datosPersonales") {
+        try {
+          // Busca el contacto por whatsapp.phone
+          let contact = await contactModel.findOne({
+            "whatsapp.phone": message.from,
+          });
+
+          const { name, surname, address, whatsapp } = _response;
+          const { latitude, longitude } = message.content;
+
+          if (!contact) {
+            // Si no existe, lo crea
+            const newContact = {
+              name: name || "",
+              surname: surname || "",
+              address: address || { latitude, longitude } || "",
+              whatsapp: {
+                username: message.username || "",
+                phone: message.from,
+              },
+              createdAt: new Date(),
+            };
+            await contactModel.insertOne(newContact);
+          } else {
+            // Si existe, lo actualiza
+            const updateResult = await contactModel.updateOne(
+              { "whatsapp.phone": message.from },
+              {
+                name: name || contact.name || "",
+                surname: surname || contact.surname || "",
+                address: address || contact.address || "",
+                whatsapp: {
+                  username:
+                    whatsapp?.username || contact.whatsapp?.username || "",
+                  phone: message.from,
+                },
+              }
+            );
+          }
+        } catch (err) {
+          console.error("Error guardando datos personales:", err);
         }
-      );
-    }
-  } catch (err) {
-    console.error("Error guardando datos personales:", err);
-  }
-}
+      }
       // Solo guardar username cuando la intención es "datosPersonales"
       if (_response.intent === "datosPersonales") {
         try {
-          let contact = await contactModel.findOne({ "whatsapp.phone": message.from });
+          let contact = await contactModel.findOne({
+            "whatsapp.phone": message.from,
+          });
           const { name, surname, address, whatsapp } = _response;
           const { latitude, longitude } = message.content || {};
 
@@ -223,7 +235,9 @@ export async function generateResponse(message: any): Promise<any> {
             const newContact = {
               name: name || "",
               surname: surname || "",
-              address: address || (latitude && longitude ? { latitude, longitude } : ""),
+              address:
+                address ||
+                (latitude && longitude ? { latitude, longitude } : ""),
               whatsapp: {
                 username: whatsapp?.username || "", // ya no usamos message.username directamente
                 phone: message.from,
@@ -239,7 +253,8 @@ export async function generateResponse(message: any): Promise<any> {
                 surname: surname || contact.surname || "",
                 address: address || contact.address || "",
                 whatsapp: {
-                  username: whatsapp?.username || contact.whatsapp?.username || "",
+                  username:
+                    whatsapp?.username || contact.whatsapp?.username || "",
                   phone: message.from,
                 },
               }
@@ -249,7 +264,6 @@ export async function generateResponse(message: any): Promise<any> {
           console.error("Error guardando datos personales:", err);
         }
       }
-
 
       // Verificar si el agente detectó datos personales
       response.contentType = message.contentType;
