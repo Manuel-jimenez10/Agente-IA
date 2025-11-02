@@ -1,10 +1,4 @@
-# AiGIS backend
-
-## Deployment
-
-- Url: https://server.api.aigis.io/api
-
-- Path en server: `/opt/server`
+# Agente-IA
 
 - Environment: `/env/env.[environment]`
     - environment = testing
